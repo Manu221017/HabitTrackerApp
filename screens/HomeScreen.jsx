@@ -6,44 +6,33 @@ import {
   ScrollView,
   FlatList,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
 import GlobalStyles from '../constants/Styles';
 import { useAuth } from '../contexts/AuthContext';
-import { logOut } from '../config/firebase';
+import { useHabits } from '../contexts/HabitsContext';
+import { logOut, updateHabitStatus } from '../config/firebase';
 
 export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
-  const [habits, setHabits] = useState([
-    {
-      id: '1',
-      title: 'Ejercicio Matutino',
-      description: '30 minutos de cardio',
-      streak: 5,
-      status: 'completed',
-      category: 'Salud',
-      time: '08:00',
-    },
-    {
-      id: '2',
-      title: 'Leer',
-      description: '20 páginas del libro actual',
-      streak: 12,
-      status: 'pending',
-      category: 'Desarrollo Personal',
-      time: '21:00',
-    },
-    {
-      id: '3',
-      title: 'Meditar',
-      description: '10 minutos de mindfulness',
-      streak: 3,
-      status: 'missed',
-      category: 'Bienestar',
-      time: '07:00',
-    },
-  ]);
+  const { 
+    habits, 
+    loading, 
+    error, 
+    setError,
+    getProgressPercentage,
+    getTotalStreak,
+    getBestStreak
+  } = useHabits();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // The HabitsContext will automatically refresh the data
+    setTimeout(() => setRefreshing(false), 1000);
+  };
 
   const handleLogout = async () => {
     Alert.alert(
@@ -72,18 +61,19 @@ export default function HomeScreen({ navigation }) {
     );
   };
 
-  const toggleHabitStatus = (habitId) => {
-    setHabits(prevHabits =>
-      prevHabits.map(habit =>
-        habit.id === habitId
-          ? {
-              ...habit,
-              status: habit.status === 'completed' ? 'pending' : 'completed',
-              streak: habit.status === 'completed' ? Math.max(0, habit.streak - 1) : habit.streak + 1,
-            }
-          : habit
-      )
-    );
+  const toggleHabitStatus = async (habitId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+      const result = await updateHabitStatus(habitId, newStatus);
+      
+      if (!result.success) {
+        Alert.alert('Error', result.error || 'Error al actualizar el hábito');
+      }
+      // No need to update local state - HabitsContext will handle it automatically
+    } catch (error) {
+      console.error('Error updating habit:', error);
+      Alert.alert('Error', 'Error al actualizar el hábito');
+    }
   };
 
   const getStatusColor = (status) => {
@@ -108,13 +98,8 @@ export default function HomeScreen({ navigation }) {
       case 'missed':
         return 'Perdido';
       default:
-        return 'Desconocido';
+        return 'Pendiente';
     }
-  };
-
-  const getProgressPercentage = () => {
-    const completed = habits.filter(h => h.status === 'completed').length;
-    return Math.round((completed / habits.length) * 100) || 0;
   };
 
   const renderHabitCard = ({ item }) => (
@@ -153,7 +138,7 @@ export default function HomeScreen({ navigation }) {
               borderRadius: 8,
             }}>
               <Text style={[GlobalStyles.smallText, { color: Colors.textSecondary }]}>
-                🔥 {item.streak} días
+                🔥 {item.streak || 0} días
               </Text>
             </View>
           </View>
@@ -170,7 +155,7 @@ export default function HomeScreen({ navigation }) {
             borderWidth: 2,
             borderColor: item.status === 'completed' ? Colors.habitCompleted : Colors.cardBorder,
           }}
-          onPress={() => toggleHabitStatus(item.id)}
+          onPress={() => toggleHabitStatus(item.id, item.status)}
         >
           <Text style={{
             fontSize: 16,
@@ -192,9 +177,54 @@ export default function HomeScreen({ navigation }) {
     </View>
   );
 
+  const renderEmptyState = () => (
+    <View style={[GlobalStyles.card, { alignItems: 'center', padding: 24 }]}>
+      <Text style={[GlobalStyles.heading, { textAlign: 'center', marginBottom: 8 }]}>
+        ¡No tienes hábitos aún!
+      </Text>
+      <Text style={[GlobalStyles.caption, { textAlign: 'center', marginBottom: 16 }]}>
+        Crea tu primer hábito y comienza a construir una mejor versión de ti mismo
+      </Text>
+      <TouchableOpacity
+        style={GlobalStyles.buttonPrimary}
+        onPress={() => navigation.navigate('CreateHabit')}
+      >
+        <Text style={GlobalStyles.buttonText}>Crear mi primer hábito</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderErrorState = () => (
+    <View style={[GlobalStyles.card, { alignItems: 'center', padding: 24 }]}>
+      <Text style={[GlobalStyles.heading, { textAlign: 'center', marginBottom: 8, color: Colors.error }]}>
+        Error al cargar hábitos
+      </Text>
+      <Text style={[GlobalStyles.caption, { textAlign: 'center', marginBottom: 16 }]}>
+        {error}
+      </Text>
+      <TouchableOpacity
+        style={GlobalStyles.buttonPrimary}
+        onPress={() => setError(null)}
+      >
+        <Text style={GlobalStyles.buttonText}>Reintentar</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <SafeAreaView style={GlobalStyles.safeArea}>
-      <ScrollView style={GlobalStyles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={GlobalStyles.container} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[Colors.primary]}
+            tintColor={Colors.primary}
+          />
+        }
+      >
         {/* Header with Progress */}
         <View style={[GlobalStyles.card, { marginBottom: 12 }]}>
           <View style={[GlobalStyles.rowSpaceBetween, { marginBottom: 12 }]}>
@@ -251,27 +281,29 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         {/* Stats Cards */}
-        <View style={[GlobalStyles.row, { marginBottom: 12 }]}>
-          <View style={[GlobalStyles.statsCard, { flex: 1, marginRight: 6 }]}>
-            <Text style={[GlobalStyles.heading, { color: Colors.success }]}>
-              {habits.reduce((sum, habit) => sum + habit.streak, 0)}
-            </Text>
-            <Text style={GlobalStyles.caption}>Total de rachas</Text>
+        {habits.length > 0 && (
+          <View style={[GlobalStyles.row, { marginBottom: 12 }]}>
+            <View style={[GlobalStyles.statsCard, { flex: 1, marginRight: 6 }]}>
+              <Text style={[GlobalStyles.heading, { color: Colors.success }]}>
+                {getTotalStreak()}
+              </Text>
+              <Text style={GlobalStyles.caption}>Total de rachas</Text>
+            </View>
+            
+            <View style={[GlobalStyles.statsCard, { flex: 1, marginLeft: 6 }]}>
+              <Text style={[GlobalStyles.heading, { color: Colors.primary }]}>
+                {getBestStreak()}
+              </Text>
+              <Text style={GlobalStyles.caption}>Mejor racha</Text>
+            </View>
           </View>
-          
-          <View style={[GlobalStyles.statsCard, { flex: 1, marginLeft: 6 }]}>
-            <Text style={[GlobalStyles.heading, { color: Colors.primary }]}>
-              {Math.max(...habits.map(h => h.streak))}
-            </Text>
-            <Text style={GlobalStyles.caption}>Mejor racha</Text>
-          </View>
-        </View>
+        )}
 
         {/* Habits List */}
         <View style={{ marginBottom: 12 }}>
           <View style={[GlobalStyles.rowSpaceBetween, { marginBottom: 12, paddingHorizontal: 12 }]}>
             <Text style={GlobalStyles.subtitle}>
-              Mis Hábitos
+              Mis Hábitos ({habits.length})
             </Text>
             <TouchableOpacity
               style={GlobalStyles.buttonSmall}
@@ -281,13 +313,23 @@ export default function HomeScreen({ navigation }) {
             </TouchableOpacity>
           </View>
           
-          <FlatList
-            data={habits}
-            renderItem={renderHabitCard}
-            keyExtractor={item => item.id}
-            scrollEnabled={false}
-            showsVerticalScrollIndicator={false}
-          />
+          {loading ? (
+            <View style={[GlobalStyles.card, { alignItems: 'center', padding: 24 }]}>
+              <Text style={GlobalStyles.caption}>Cargando hábitos...</Text>
+            </View>
+          ) : error ? (
+            renderErrorState()
+          ) : habits.length === 0 ? (
+            renderEmptyState()
+          ) : (
+            <FlatList
+              data={habits}
+              renderItem={renderHabitCard}
+              keyExtractor={item => item.id}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+            />
+          )}
         </View>
 
         {/* Quick Actions */}

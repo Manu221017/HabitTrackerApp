@@ -1,94 +1,105 @@
 // App.js
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar } from 'expo-status-bar';
+import { createStackNavigator } from '@react-navigation/stack';
 import { ActivityIndicator, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import HomeScreen from './screens/HomeScreen';
+// Import screens
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import HomeScreen from './screens/HomeScreen';
 import CreateHabitScreen from './screens/CreateHabitScreen';
+
+// Import contexts
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { HabitsProvider } from './contexts/HabitsContext';
+
+// Import styles
 import Colors from './constants/Colors';
 import GlobalStyles from './constants/Styles';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
-function Navigation() {
+function NavigationContent() {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <View style={[GlobalStyles.centerContainer, { backgroundColor: Colors.background }]}>
+      <View style={[GlobalStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
 
   return (
-    <NavigationContainer>
-      <StatusBar style="dark" backgroundColor={Colors.background} />
-      <Stack.Navigator 
-        initialRouteName={user ? "Home" : "Login"}
-        screenOptions={{
-          headerStyle: GlobalStyles.headerStyle,
-          headerTitleStyle: GlobalStyles.headerTitleStyle,
-          headerTintColor: Colors.primary,
-          headerShadowVisible: false,
-          contentStyle: { backgroundColor: Colors.background },
-        }}
-      >
-        {user ? (
-          // Authenticated stack
-          <>
-            <Stack.Screen 
-              name="Home" 
-              component={HomeScreen} 
-              options={{ 
-                title: 'Mis Hábitos',
-                headerShown: true 
-              }} 
-            />
-            <Stack.Screen 
-              name="CreateHabit" 
-              component={CreateHabitScreen} 
-              options={{ 
-                title: 'Crear Hábito',
-                headerShown: true 
-              }} 
-            />
-          </>
-        ) : (
-          // Non-authenticated stack
-          <>
-            <Stack.Screen 
-              name="Login" 
-              component={LoginScreen} 
-              options={{ 
-                title: 'Iniciar Sesión',
-                headerShown: false 
-              }} 
-            />
-            <Stack.Screen 
-              name="Register" 
-              component={RegisterScreen} 
-              options={{ 
-                title: 'Registrarse',
-                headerShown: false 
-              }} 
-            />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: Colors.primary,
+        },
+        headerTintColor: Colors.textInverse,
+        headerTitleStyle: {
+          fontWeight: '600',
+        },
+        headerShown: false,
+      }}
+    >
+      {user ? (
+        // Authenticated stack
+        <>
+          <Stack.Screen 
+            name="Home" 
+            component={HomeScreen}
+            options={{
+              title: 'HabitTracker',
+              headerShown: true,
+            }}
+          />
+          <Stack.Screen 
+            name="CreateHabit" 
+            component={CreateHabitScreen}
+            options={{
+              title: 'Crear Hábito',
+              headerShown: true,
+            }}
+          />
+        </>
+      ) : (
+        // Unauthenticated stack
+        <>
+          <Stack.Screen 
+            name="Login" 
+            component={LoginScreen}
+            options={{
+              title: 'Iniciar Sesión',
+              headerShown: true,
+            }}
+          />
+          <Stack.Screen 
+            name="Register" 
+            component={RegisterScreen}
+            options={{
+              title: 'Crear Cuenta',
+              headerShown: true,
+            }}
+          />
+        </>
+      )}
+    </Stack.Navigator>
   );
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Navigation />
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <HabitsProvider>
+          <NavigationContainer>
+            <NavigationContent />
+          </NavigationContainer>
+        </HabitsProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }

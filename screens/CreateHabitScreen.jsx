@@ -12,146 +12,133 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
 import GlobalStyles from '../constants/Styles';
+import { createHabit } from '../config/firebase';
+
+const categories = [
+  'Salud',
+  'Desarrollo Personal',
+  'Bienestar',
+  'Productividad',
+  'Aprendizaje',
+  'Social',
+  'Finanzas',
+  'Otros'
+];
 
 export default function CreateHabitScreen({ navigation }) {
-  const [habitTitle, setHabitTitle] = useState('');
+  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedTime, setSelectedTime] = useState('08:00');
+  const [category, setCategory] = useState('');
+  const [time, setTime] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const categories = [
-    { id: 'salud', name: 'Salud', icon: '🏃‍♂️', color: Colors.success },
-    { id: 'desarrollo', name: 'Desarrollo Personal', icon: '📚', color: Colors.primary },
-    { id: 'bienestar', name: 'Bienestar', icon: '🧘‍♀️', color: Colors.accent },
-    { id: 'productividad', name: 'Productividad', icon: '⚡', color: Colors.info },
-    { id: 'social', name: 'Social', icon: '👥', color: Colors.habitStreak },
-    { id: 'finanzas', name: 'Finanzas', icon: '💰', color: Colors.secondary },
-  ];
-
-  const timeOptions = [
-    '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
-    '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
-    '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
-  ];
-
-  const handleCreateHabit = () => {
-    if (!habitTitle.trim()) {
-      Alert.alert('Error', 'Por favor ingresa el título del hábito');
+  const handleCreateHabit = async () => {
+    // Validation
+    if (!title.trim()) {
+      Alert.alert('Error', 'Por favor ingresa un título para el hábito');
       return;
     }
 
-    if (!selectedCategory) {
+    if (!description.trim()) {
+      Alert.alert('Error', 'Por favor ingresa una descripción');
+      return;
+    }
+
+    if (!category) {
       Alert.alert('Error', 'Por favor selecciona una categoría');
       return;
     }
 
+    if (!time) {
+      Alert.alert('Error', 'Por favor selecciona una hora');
+      return;
+    }
+
     setIsLoading(true);
-    
-    // Simulate habit creation
-    setTimeout(() => {
+
+    try {
+      const habitData = {
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        time,
+        status: 'pending'
+      };
+
+      const result = await createHabit(habitData);
+
+      if (result.success) {
+        Alert.alert(
+          '¡Éxito!',
+          'Hábito creado exitosamente',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                // Clear form and navigate back
+                setTitle('');
+                setDescription('');
+                setCategory('');
+                setTime('');
+                navigation.goBack();
+              }
+            }
+          ]
+        );
+      } else {
+        Alert.alert('Error', result.error || 'Error al crear el hábito');
+      }
+    } catch (error) {
+      console.error('Error creating habit:', error);
+      Alert.alert('Error', 'Ocurrió un error inesperado. Intenta de nuevo.');
+    } finally {
       setIsLoading(false);
-      Alert.alert(
-        '¡Éxito!', 
-        'Hábito creado exitosamente. ¡Comienza tu nueva racha!',
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
-      );
-    }, 1500);
+    }
   };
 
-  const renderCategoryItem = (category) => (
-    <TouchableOpacity
-      key={category.id}
-      style={[
-        GlobalStyles.cardSmall,
-        {
-          borderColor: selectedCategory === category.id ? category.color : Colors.cardBorder,
-          borderWidth: selectedCategory === category.id ? 2 : 1,
-          backgroundColor: selectedCategory === category.id ? `${category.color}10` : Colors.cardBackground,
-        }
-      ]}
-      onPress={() => setSelectedCategory(category.id)}
-    >
-      <View style={GlobalStyles.row}>
-        <Text style={{ fontSize: 20, marginRight: 10 }}>
-          {category.icon}
-        </Text>
-        <View style={{ flex: 1 }}>
-          <Text style={[GlobalStyles.heading, { 
-            color: selectedCategory === category.id ? category.color : Colors.textPrimary,
-            marginBottom: 2,
-          }]}>
-            {category.name}
-          </Text>
-          <Text style={[GlobalStyles.smallText, { lineHeight: 14 }]}>
-            {category.id === 'salud' && 'Ejercicio, alimentación, sueño'}
-            {category.id === 'desarrollo' && 'Lectura, aprendizaje, habilidades'}
-            {category.id === 'bienestar' && 'Meditación, mindfulness, relajación'}
-            {category.id === 'productividad' && 'Organización, planificación, metas'}
-            {category.id === 'social' && 'Relaciones, comunicación, networking'}
-            {category.id === 'finanzas' && 'Ahorro, inversión, presupuesto'}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-
-  const renderTimeOption = (time) => (
-    <TouchableOpacity
-      key={time}
-      style={[
-        {
-          paddingHorizontal: 12,
-          paddingVertical: 8,
-          borderRadius: 6,
-          marginHorizontal: 3,
-          marginVertical: 3,
-          borderWidth: 1,
-          borderColor: selectedTime === time ? Colors.primary : Colors.cardBorder,
-          backgroundColor: selectedTime === time ? Colors.primary : Colors.backgroundSecondary,
-        }
-      ]}
-      onPress={() => setSelectedTime(time)}
-    >
-      <Text style={[
-        GlobalStyles.smallText,
-        { 
-          color: selectedTime === time ? Colors.textInverse : Colors.textPrimary,
-          fontWeight: selectedTime === time ? '600' : '400'
-        }
-      ]}>
-        {time}
-      </Text>
-    </TouchableOpacity>
-  );
+  const handleTimeSelection = () => {
+    // Simple time picker simulation
+    const times = ['06:00', '07:00', '08:00', '09:00', '12:00', '15:00', '18:00', '20:00', '21:00'];
+    Alert.alert(
+      'Seleccionar Hora',
+      'Elige una hora para tu hábito',
+      times.map(timeOption => ({
+        text: timeOption,
+        onPress: () => setTime(timeOption)
+      }))
+    );
+  };
 
   return (
     <SafeAreaView style={GlobalStyles.safeArea}>
       <KeyboardAvoidingView 
-        style={GlobalStyles.container}
+        style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView 
-          style={GlobalStyles.container}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ 
+            paddingHorizontal: 16,
+            paddingVertical: 20,
+            paddingBottom: 40
+          }}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <View style={[GlobalStyles.card, { marginBottom: 12 }]}>
-            <Text style={[GlobalStyles.title, { marginBottom: 6 }]}>
+          <View style={[GlobalStyles.card, { marginBottom: 20, alignItems: 'center' }]}>
+            <Text style={[GlobalStyles.title, { color: Colors.primary, textAlign: 'center' }]}>
               Crear Nuevo Hábito
             </Text>
-            <Text style={GlobalStyles.caption}>
-              Define tu nuevo hábito y comienza a construir una mejor versión de ti mismo
+            <Text style={[GlobalStyles.caption, { textAlign: 'center', marginTop: 6 }]}>
+              Define tu nuevo hábito y comienza tu viaje
             </Text>
           </View>
 
-          {/* Habit Title */}
-          <View style={GlobalStyles.card}>
-            <Text style={[GlobalStyles.heading, { marginBottom: 12 }]}>
-              Información del Hábito
-            </Text>
-            
-            <View style={{ marginBottom: 12 }}>
+          {/* Form */}
+          <View style={[GlobalStyles.card, { marginBottom: 20 }]}>
+            {/* Title Input */}
+            <View style={{ marginBottom: 16 }}>
               <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
                 Título del Hábito *
               </Text>
@@ -159,89 +146,102 @@ export default function CreateHabitScreen({ navigation }) {
                 style={GlobalStyles.input}
                 placeholder="Ej: Ejercicio matutino"
                 placeholderTextColor={Colors.textTertiary}
-                value={habitTitle}
-                onChangeText={setHabitTitle}
-                autoCapitalize="words"
+                value={title}
+                onChangeText={setTitle}
+                maxLength={50}
+                editable={!isLoading}
               />
             </View>
 
-            <View style={{ marginBottom: 12 }}>
+            {/* Description Input */}
+            <View style={{ marginBottom: 16 }}>
               <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
-                Descripción (opcional)
+                Descripción *
               </Text>
               <TextInput
-                style={[GlobalStyles.input, { height: 70, textAlignVertical: 'top' }]}
+                style={[GlobalStyles.input, { height: 80, textAlignVertical: 'top' }]}
                 placeholder="Describe tu hábito en detalle..."
                 placeholderTextColor={Colors.textTertiary}
                 value={description}
                 onChangeText={setDescription}
                 multiline
                 numberOfLines={3}
+                maxLength={200}
+                editable={!isLoading}
               />
             </View>
-          </View>
 
-          {/* Category Selection */}
-          <View style={GlobalStyles.card}>
-            <Text style={[GlobalStyles.heading, { marginBottom: 12 }]}>
-              Categoría *
-            </Text>
-            <Text style={[GlobalStyles.caption, { marginBottom: 12 }]}>
-              Selecciona la categoría que mejor describe tu hábito
-            </Text>
-            
-            <View style={{ gap: 6 }}>
-              {categories.map(renderCategoryItem)}
-            </View>
-          </View>
-
-          {/* Time Selection */}
-          <View style={GlobalStyles.card}>
-            <Text style={[GlobalStyles.heading, { marginBottom: 12 }]}>
-              Hora del Día
-            </Text>
-            <Text style={[GlobalStyles.caption, { marginBottom: 12 }]}>
-              ¿A qué hora prefieres realizar este hábito?
-            </Text>
-            
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
-              {timeOptions.map(renderTimeOption)}
-            </View>
-          </View>
-
-          {/* Tips */}
-          <View style={[GlobalStyles.card, { marginBottom: 20 }]}>
-            <Text style={[GlobalStyles.heading, { marginBottom: 12 }]}>
-              💡 Consejos para el Éxito
-            </Text>
-            <View style={{ gap: 8 }}>
-              <View style={GlobalStyles.row}>
-                <Text style={{ fontSize: 14, marginRight: 6 }}>🎯</Text>
-                <Text style={GlobalStyles.caption}>
-                  Comienza con hábitos pequeños y específicos
-                </Text>
-              </View>
-              <View style={GlobalStyles.row}>
-                <Text style={{ fontSize: 14, marginRight: 6 }}>📅</Text>
-                <Text style={GlobalStyles.caption}>
-                  Mantén consistencia, no perfección
-                </Text>
-              </View>
-              <View style={GlobalStyles.row}>
-                <Text style={{ fontSize: 14, marginRight: 6 }}>🔥</Text>
-                <Text style={GlobalStyles.caption}>
-                  Construye rachas para mayor motivación
-                </Text>
+            {/* Category Selection */}
+            <View style={{ marginBottom: 16 }}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
+                Categoría *
+              </Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {categories.map((cat) => (
+                  <TouchableOpacity
+                    key={cat}
+                    style={[
+                      {
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 20,
+                        borderWidth: 2,
+                        borderColor: category === cat ? Colors.primary : Colors.cardBorder,
+                        backgroundColor: category === cat ? Colors.primary : Colors.backgroundSecondary,
+                        marginBottom: 8,
+                      },
+                      !isLoading && { opacity: 0.8 }
+                    ]}
+                    onPress={() => setCategory(cat)}
+                    disabled={isLoading}
+                  >
+                    <Text style={[
+                      GlobalStyles.smallText,
+                      { 
+                        color: category === cat ? Colors.textInverse : Colors.textSecondary,
+                        fontWeight: category === cat ? '600' : '400'
+                      }
+                    ]}>
+                      {cat}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             </View>
-          </View>
 
-          {/* Create Button */}
-          <View style={GlobalStyles.paddingHorizontal}>
+            {/* Time Selection */}
+            <View style={{ marginBottom: 24 }}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
+                Hora del Día *
+              </Text>
+              <TouchableOpacity
+                style={[
+                  GlobalStyles.input,
+                  { 
+                    justifyContent: 'center',
+                    backgroundColor: time ? Colors.backgroundSecondary : Colors.inputBackground
+                  }
+                ]}
+                onPress={handleTimeSelection}
+                disabled={isLoading}
+              >
+                <Text style={[
+                  GlobalStyles.caption,
+                  { 
+                    color: time ? Colors.textPrimary : Colors.textTertiary,
+                    textAlign: 'center'
+                  }
+                ]}>
+                  {time || 'Seleccionar hora'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Create Button */}
             <TouchableOpacity
               style={[
                 GlobalStyles.buttonPrimary,
-                { marginBottom: 20 },
+                { marginBottom: 12 },
                 isLoading && { opacity: 0.7 }
               ]}
               onPress={handleCreateHabit}
@@ -251,6 +251,49 @@ export default function CreateHabitScreen({ navigation }) {
                 {isLoading ? 'Creando...' : 'Crear Hábito'}
               </Text>
             </TouchableOpacity>
+
+            {/* Cancel Button */}
+            <TouchableOpacity
+              style={[
+                GlobalStyles.buttonSecondary,
+                { marginBottom: 12 }
+              ]}
+              onPress={() => navigation.goBack()}
+              disabled={isLoading}
+            >
+              <Text style={GlobalStyles.buttonTextSecondary}>
+                Cancelar
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Tips */}
+          <View style={[GlobalStyles.card, { marginBottom: 20 }]}>
+            <Text style={[GlobalStyles.subtitle, { textAlign: 'center', marginBottom: 12 }]}>
+              💡 Consejos para crear hábitos exitosos
+            </Text>
+            <View style={{ gap: 8 }}>
+              <View style={GlobalStyles.row}>
+                <Text style={[GlobalStyles.caption, { color: Colors.textSecondary }]}>
+                  • Comienza con hábitos pequeños y específicos
+                </Text>
+              </View>
+              <View style={GlobalStyles.row}>
+                <Text style={[GlobalStyles.caption, { color: Colors.textSecondary }]}>
+                  • Elige una hora consistente cada día
+                </Text>
+              </View>
+              <View style={GlobalStyles.row}>
+                <Text style={[GlobalStyles.caption, { color: Colors.textSecondary }]}>
+                  • Conecta el hábito con una actividad existente
+                </Text>
+              </View>
+              <View style={GlobalStyles.row}>
+                <Text style={[GlobalStyles.caption, { color: Colors.textSecondary }]}>
+                  • Celebra cada pequeño progreso
+                </Text>
+              </View>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

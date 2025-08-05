@@ -51,8 +51,13 @@ export default function RegisterScreen({ navigation }) {
         Alert.alert(
           '¡Éxito!', 
           'Cuenta creada exitosamente. Ya puedes iniciar sesión.',
-          [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
+          [{ text: 'OK' }]
         );
+        // Clear form after successful registration
+        setName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
       } else {
         Alert.alert('Error de Registro', result.error);
       }
@@ -65,6 +70,11 @@ export default function RegisterScreen({ navigation }) {
   };
 
   const handleBackToLogin = () => {
+    // Clear form and navigate back to login
+    setName('');
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
     navigation.navigate('Login');
   };
 

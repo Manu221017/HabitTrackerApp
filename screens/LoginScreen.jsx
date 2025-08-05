@@ -50,6 +50,9 @@ export default function LoginScreen({ navigation }) {
   };
 
   const handleRegister = () => {
+    // Clear form and navigate to register
+    setEmail('');
+    setPassword('');
     navigation.navigate('Register');
   };
 
