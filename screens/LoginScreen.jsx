@@ -12,24 +12,41 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
 import GlobalStyles from '../constants/Styles';
+import { signIn } from '../config/firebase';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Por favor completa todos los campos');
       return;
     }
+
+    if (!email.includes('@')) {
+      Alert.alert('Error', 'Por favor ingresa un correo electrónico válido');
+      return;
+    }
     
     setIsLoading(true);
-    // Simulate login process
-    setTimeout(() => {
+    
+    try {
+      const result = await signIn(email, password);
+      
+      if (result.success) {
+        // Login successful - navigation will be handled by AuthContext
+        console.log('Login successful:', result.user.email);
+      } else {
+        Alert.alert('Error de Inicio de Sesión', result.error);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Ocurrió un error inesperado. Intenta de nuevo.');
+      console.error('Login error:', error);
+    } finally {
       setIsLoading(false);
-      navigation.replace('Home');
-    }, 1500);
+    }
   };
 
   const handleRegister = () => {
@@ -47,24 +64,24 @@ export default function LoginScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         >
           {/* Header Section */}
-          <View style={[GlobalStyles.card, { marginBottom: 32, alignItems: 'center' }]}>
+          <View style={[GlobalStyles.card, { marginBottom: 24, alignItems: 'center' }]}>
             <Text style={[GlobalStyles.title, { color: Colors.primary, textAlign: 'center' }]}>
               HabitTracker
             </Text>
-            <Text style={[GlobalStyles.caption, { textAlign: 'center', marginTop: 8 }]}>
+            <Text style={[GlobalStyles.caption, { textAlign: 'center', marginTop: 6 }]}>
               Construye hábitos positivos, un día a la vez
             </Text>
           </View>
 
           {/* Login Form */}
           <View style={[GlobalStyles.card, { width: '90%', maxWidth: 400 }]}>
-            <Text style={[GlobalStyles.heading, { marginBottom: 24, textAlign: 'center' }]}>
+            <Text style={[GlobalStyles.heading, { marginBottom: 20, textAlign: 'center' }]}>
               Iniciar Sesión
             </Text>
 
             {/* Email Input */}
-            <View style={{ marginBottom: 16 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 8, color: Colors.textPrimary }]}>
+            <View style={{ marginBottom: 12 }}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
                 Correo Electrónico
               </Text>
               <TextInput
@@ -76,12 +93,13 @@ export default function LoginScreen({ navigation }) {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                editable={!isLoading}
               />
             </View>
 
             {/* Password Input */}
-            <View style={{ marginBottom: 24 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 8, color: Colors.textPrimary }]}>
+            <View style={{ marginBottom: 20 }}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
                 Contraseña
               </Text>
               <TextInput
@@ -92,6 +110,7 @@ export default function LoginScreen({ navigation }) {
                 onChangeText={setPassword}
                 secureTextEntry
                 autoCapitalize="none"
+                editable={!isLoading}
               />
             </View>
 
@@ -99,7 +118,7 @@ export default function LoginScreen({ navigation }) {
             <TouchableOpacity
               style={[
                 GlobalStyles.buttonPrimary,
-                { marginBottom: 16 },
+                { marginBottom: 12 },
                 isLoading && { opacity: 0.7 }
               ]}
               onPress={handleLogin}
@@ -115,7 +134,7 @@ export default function LoginScreen({ navigation }) {
               <Text style={GlobalStyles.caption}>
                 ¿No tienes cuenta?{' '}
               </Text>
-              <TouchableOpacity onPress={handleRegister}>
+              <TouchableOpacity onPress={handleRegister} disabled={isLoading}>
                 <Text style={[GlobalStyles.caption, { color: Colors.primary, fontWeight: '600' }]}>
                   Regístrate aquí
                 </Text>
@@ -124,19 +143,19 @@ export default function LoginScreen({ navigation }) {
           </View>
 
           {/* Features Preview */}
-          <View style={[GlobalStyles.card, { width: '90%', maxWidth: 400, marginTop: 24 }]}>
-            <Text style={[GlobalStyles.subtitle, { textAlign: 'center', marginBottom: 16 }]}>
+          <View style={[GlobalStyles.card, { width: '90%', maxWidth: 400, marginTop: 20 }]}>
+            <Text style={[GlobalStyles.subtitle, { textAlign: 'center', marginBottom: 12 }]}>
               ¿Por qué HabitTracker?
             </Text>
-            <View style={{ gap: 12 }}>
+            <View style={{ gap: 8 }}>
               <View style={GlobalStyles.row}>
                 <View style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
                   backgroundColor: Colors.success,
-                  marginRight: 12,
-                  marginTop: 6
+                  marginRight: 10,
+                  marginTop: 4
                 }} />
                 <Text style={GlobalStyles.caption}>
                   Seguimiento visual de tu progreso
@@ -144,12 +163,12 @@ export default function LoginScreen({ navigation }) {
               </View>
               <View style={GlobalStyles.row}>
                 <View style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
                   backgroundColor: Colors.primary,
-                  marginRight: 12,
-                  marginTop: 6
+                  marginRight: 10,
+                  marginTop: 4
                 }} />
                 <Text style={GlobalStyles.caption}>
                   Recordatorios personalizados
@@ -157,12 +176,12 @@ export default function LoginScreen({ navigation }) {
               </View>
               <View style={GlobalStyles.row}>
                 <View style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
                   backgroundColor: Colors.accent,
-                  marginRight: 12,
-                  marginTop: 6
+                  marginRight: 10,
+                  marginTop: 4
                 }} />
                 <Text style={GlobalStyles.caption}>
                   Estadísticas motivacionales

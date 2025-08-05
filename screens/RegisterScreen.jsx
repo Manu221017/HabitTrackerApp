@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
 import GlobalStyles from '../constants/Styles';
+import { signUp } from '../config/firebase';
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -20,9 +21,14 @@ export default function RegisterScreen({ navigation }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Por favor completa todos los campos');
+      return;
+    }
+
+    if (!email.includes('@')) {
+      Alert.alert('Error', 'Por favor ingresa un correo electrónico válido');
       return;
     }
 
@@ -37,15 +43,25 @@ export default function RegisterScreen({ navigation }) {
     }
     
     setIsLoading(true);
-    // Simulate registration process
-    setTimeout(() => {
+    
+    try {
+      const result = await signUp(email, password, name);
+      
+      if (result.success) {
+        Alert.alert(
+          '¡Éxito!', 
+          'Cuenta creada exitosamente. Ya puedes iniciar sesión.',
+          [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
+        );
+      } else {
+        Alert.alert('Error de Registro', result.error);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Ocurrió un error inesperado. Intenta de nuevo.');
+      console.error('Registration error:', error);
+    } finally {
       setIsLoading(false);
-      Alert.alert(
-        '¡Éxito!', 
-        'Cuenta creada exitosamente. Ya puedes iniciar sesión.',
-        [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
-      );
-    }, 2000);
+    }
   };
 
   const handleBackToLogin = () => {
@@ -63,24 +79,24 @@ export default function RegisterScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         >
           {/* Header Section */}
-          <View style={[GlobalStyles.card, { marginBottom: 32, alignItems: 'center' }]}>
+          <View style={[GlobalStyles.card, { marginBottom: 24, alignItems: 'center' }]}>
             <Text style={[GlobalStyles.title, { color: Colors.primary, textAlign: 'center' }]}>
               Crear Cuenta
             </Text>
-            <Text style={[GlobalStyles.caption, { textAlign: 'center', marginTop: 8 }]}>
+            <Text style={[GlobalStyles.caption, { textAlign: 'center', marginTop: 6 }]}>
               Únete a HabitTracker y comienza tu viaje
             </Text>
           </View>
 
           {/* Registration Form */}
           <View style={[GlobalStyles.card, { width: '90%', maxWidth: 400 }]}>
-            <Text style={[GlobalStyles.heading, { marginBottom: 24, textAlign: 'center' }]}>
+            <Text style={[GlobalStyles.heading, { marginBottom: 20, textAlign: 'center' }]}>
               Información Personal
             </Text>
 
             {/* Name Input */}
-            <View style={{ marginBottom: 16 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 8, color: Colors.textPrimary }]}>
+            <View style={{ marginBottom: 12 }}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
                 Nombre Completo
               </Text>
               <TextInput
@@ -91,12 +107,13 @@ export default function RegisterScreen({ navigation }) {
                 onChangeText={setName}
                 autoCapitalize="words"
                 autoCorrect={false}
+                editable={!isLoading}
               />
             </View>
 
             {/* Email Input */}
-            <View style={{ marginBottom: 16 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 8, color: Colors.textPrimary }]}>
+            <View style={{ marginBottom: 12 }}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
                 Correo Electrónico
               </Text>
               <TextInput
@@ -108,12 +125,13 @@ export default function RegisterScreen({ navigation }) {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                editable={!isLoading}
               />
             </View>
 
             {/* Password Input */}
-            <View style={{ marginBottom: 16 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 8, color: Colors.textPrimary }]}>
+            <View style={{ marginBottom: 12 }}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
                 Contraseña
               </Text>
               <TextInput
@@ -124,12 +142,13 @@ export default function RegisterScreen({ navigation }) {
                 onChangeText={setPassword}
                 secureTextEntry
                 autoCapitalize="none"
+                editable={!isLoading}
               />
             </View>
 
             {/* Confirm Password Input */}
-            <View style={{ marginBottom: 24 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 8, color: Colors.textPrimary }]}>
+            <View style={{ marginBottom: 20 }}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
                 Confirmar Contraseña
               </Text>
               <TextInput
@@ -140,6 +159,7 @@ export default function RegisterScreen({ navigation }) {
                 onChangeText={setConfirmPassword}
                 secureTextEntry
                 autoCapitalize="none"
+                editable={!isLoading}
               />
             </View>
 
@@ -147,7 +167,7 @@ export default function RegisterScreen({ navigation }) {
             <TouchableOpacity
               style={[
                 GlobalStyles.buttonPrimary,
-                { marginBottom: 16 },
+                { marginBottom: 12 },
                 isLoading && { opacity: 0.7 }
               ]}
               onPress={handleRegister}
@@ -163,7 +183,7 @@ export default function RegisterScreen({ navigation }) {
               <Text style={GlobalStyles.caption}>
                 ¿Ya tienes cuenta?{' '}
               </Text>
-              <TouchableOpacity onPress={handleBackToLogin}>
+              <TouchableOpacity onPress={handleBackToLogin} disabled={isLoading}>
                 <Text style={[GlobalStyles.caption, { color: Colors.primary, fontWeight: '600' }]}>
                   Inicia sesión aquí
                 </Text>
@@ -172,19 +192,19 @@ export default function RegisterScreen({ navigation }) {
           </View>
 
           {/* Benefits Section */}
-          <View style={[GlobalStyles.card, { width: '90%', maxWidth: 400, marginTop: 24 }]}>
-            <Text style={[GlobalStyles.subtitle, { textAlign: 'center', marginBottom: 16 }]}>
+          <View style={[GlobalStyles.card, { width: '90%', maxWidth: 400, marginTop: 20 }]}>
+            <Text style={[GlobalStyles.subtitle, { textAlign: 'center', marginBottom: 12 }]}>
               Beneficios de HabitTracker
             </Text>
-            <View style={{ gap: 12 }}>
+            <View style={{ gap: 8 }}>
               <View style={GlobalStyles.row}>
                 <View style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
                   backgroundColor: Colors.success,
-                  marginRight: 12,
-                  marginTop: 6
+                  marginRight: 10,
+                  marginTop: 4
                 }} />
                 <Text style={GlobalStyles.caption}>
                   Gratis para siempre
@@ -192,12 +212,12 @@ export default function RegisterScreen({ navigation }) {
               </View>
               <View style={GlobalStyles.row}>
                 <View style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
                   backgroundColor: Colors.primary,
-                  marginRight: 12,
-                  marginTop: 6
+                  marginRight: 10,
+                  marginTop: 4
                 }} />
                 <Text style={GlobalStyles.caption}>
                   Sincronización en la nube
@@ -205,12 +225,12 @@ export default function RegisterScreen({ navigation }) {
               </View>
               <View style={GlobalStyles.row}>
                 <View style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
                   backgroundColor: Colors.accent,
-                  marginRight: 12,
-                  marginTop: 6
+                  marginRight: 10,
+                  marginTop: 4
                 }} />
                 <Text style={GlobalStyles.caption}>
                   Sin anuncios molestos

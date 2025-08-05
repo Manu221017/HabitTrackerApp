@@ -21,28 +21,11 @@ export const GlobalStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.background,
+    paddingHorizontal: 16,
   },
   
   // Card Styles
   card: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 16,
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    shadowColor: Colors.cardShadow,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  
-  cardSmall: {
     backgroundColor: Colors.cardBackground,
     borderRadius: 12,
     padding: 16,
@@ -51,77 +34,95 @@ export const GlobalStyles = StyleSheet.create({
     shadowColor: Colors.cardShadow,
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 2,
     },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
     elevation: 2,
     borderWidth: 1,
     borderColor: Colors.cardBorder,
   },
   
-  // Text Styles
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: Colors.textPrimary,
-    marginBottom: 8,
+  cardSmall: {
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 10,
+    padding: 12,
+    marginVertical: 4,
+    marginHorizontal: 8,
+    shadowColor: Colors.cardShadow,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: Colors.cardBorder,
   },
   
-  subtitle: {
-    fontSize: 20,
-    fontWeight: '600',
+  // Text Styles - Adjusted for better fit
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
     color: Colors.textPrimary,
     marginBottom: 6,
   },
   
-  heading: {
+  subtitle: {
     fontSize: 18,
     fontWeight: '600',
     color: Colors.textPrimary,
     marginBottom: 4,
   },
   
-  bodyText: {
+  heading: {
     fontSize: 16,
+    fontWeight: '600',
     color: Colors.textPrimary,
-    lineHeight: 24,
+    marginBottom: 3,
   },
   
-  caption: {
+  bodyText: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: Colors.textPrimary,
     lineHeight: 20,
   },
   
+  caption: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    lineHeight: 18,
+  },
+  
   smallText: {
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.textTertiary,
   },
   
   // Button Styles
   buttonPrimary: {
     backgroundColor: Colors.buttonPrimary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    borderRadius: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: Colors.primary,
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 3,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
   },
   
   buttonSecondary: {
     backgroundColor: Colors.buttonSecondary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    borderRadius: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -131,35 +132,35 @@ export const GlobalStyles = StyleSheet.create({
   buttonSmall: {
     backgroundColor: Colors.buttonPrimary,
     borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   
   buttonText: {
     color: Colors.buttonText,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
   },
   
   buttonTextSecondary: {
     color: Colors.buttonTextSecondary,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
   },
   
   // Input Styles
   input: {
     backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    fontSize: 16,
+    borderRadius: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    fontSize: 15,
     color: Colors.textPrimary,
     borderWidth: 1,
     borderColor: Colors.cardBorder,
-    marginVertical: 8,
+    marginVertical: 6,
   },
   
   inputFocused: {
@@ -183,43 +184,43 @@ export const GlobalStyles = StyleSheet.create({
     flexDirection: 'column',
   },
   
-  // Spacing
+  // Spacing - Reduced for better fit
   marginVertical: {
-    marginVertical: 16,
+    marginVertical: 12,
   },
   
   marginHorizontal: {
-    marginHorizontal: 16,
+    marginHorizontal: 12,
   },
   
   padding: {
-    padding: 16,
+    padding: 12,
   },
   
   paddingVertical: {
-    paddingVertical: 16,
+    paddingVertical: 12,
   },
   
   paddingHorizontal: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
   },
   
-  // Habit-specific styles
+  // Habit-specific styles - Adjusted for better fit
   habitCard: {
     backgroundColor: Colors.cardBackground,
-    borderRadius: 16,
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 6,
+    marginHorizontal: 12,
     shadowColor: Colors.cardShadow,
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-    borderLeftWidth: 4,
+    shadowRadius: 6,
+    elevation: 2,
+    borderLeftWidth: 3,
   },
   
   habitCardCompleted: {
@@ -234,23 +235,23 @@ export const GlobalStyles = StyleSheet.create({
     borderLeftColor: Colors.habitMissed,
   },
   
-  // Progress and Stats
+  // Progress and Stats - Adjusted sizes
   progressContainer: {
     backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 12,
-    height: 8,
+    borderRadius: 10,
+    height: 6,
     overflow: 'hidden',
   },
   
   progressBar: {
     height: '100%',
-    borderRadius: 12,
+    borderRadius: 10,
   },
   
   statsCard: {
     backgroundColor: Colors.cardBackground,
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: Colors.cardShadow,
@@ -259,8 +260,8 @@ export const GlobalStyles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowRadius: 6,
+    elevation: 2,
     borderWidth: 1,
     borderColor: Colors.cardBorder,
   },
@@ -276,7 +277,7 @@ export const GlobalStyles = StyleSheet.create({
   
   headerTitleStyle: {
     color: Colors.headerText,
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '600',
   },
 });
@@ -286,23 +287,23 @@ export const isSmallDevice = width < 375;
 export const isMediumDevice = width >= 375 && width < 414;
 export const isLargeDevice = width >= 414;
 
-// Spacing scale
+// Spacing scale - Adjusted for better fit
 export const spacing = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
+  xs: 3,
+  sm: 6,
+  md: 12,
+  lg: 18,
+  xl: 24,
+  xxl: 36,
 };
 
 // Border radius scale
 export const borderRadius = {
   sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  xxl: 24,
+  md: 6,
+  lg: 10,
+  xl: 12,
+  xxl: 18,
 };
 
 export default GlobalStyles; 

@@ -73,16 +73,17 @@ export default function CreateHabitScreen({ navigation }) {
       onPress={() => setSelectedCategory(category.id)}
     >
       <View style={GlobalStyles.row}>
-        <Text style={{ fontSize: 24, marginRight: 12 }}>
+        <Text style={{ fontSize: 20, marginRight: 10 }}>
           {category.icon}
         </Text>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={[GlobalStyles.heading, { 
-            color: selectedCategory === category.id ? category.color : Colors.textPrimary 
+            color: selectedCategory === category.id ? category.color : Colors.textPrimary,
+            marginBottom: 2,
           }]}>
             {category.name}
           </Text>
-          <Text style={GlobalStyles.caption}>
+          <Text style={[GlobalStyles.smallText, { lineHeight: 14 }]}>
             {category.id === 'salud' && 'Ejercicio, alimentación, sueño'}
             {category.id === 'desarrollo' && 'Lectura, aprendizaje, habilidades'}
             {category.id === 'bienestar' && 'Meditación, mindfulness, relajación'}
@@ -100,11 +101,11 @@ export default function CreateHabitScreen({ navigation }) {
       key={time}
       style={[
         {
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          borderRadius: 8,
-          marginHorizontal: 4,
-          marginVertical: 4,
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderRadius: 6,
+          marginHorizontal: 3,
+          marginVertical: 3,
           borderWidth: 1,
           borderColor: selectedTime === time ? Colors.primary : Colors.cardBorder,
           backgroundColor: selectedTime === time ? Colors.primary : Colors.backgroundSecondary,
@@ -113,7 +114,7 @@ export default function CreateHabitScreen({ navigation }) {
       onPress={() => setSelectedTime(time)}
     >
       <Text style={[
-        GlobalStyles.caption,
+        GlobalStyles.smallText,
         { 
           color: selectedTime === time ? Colors.textInverse : Colors.textPrimary,
           fontWeight: selectedTime === time ? '600' : '400'
@@ -135,8 +136,8 @@ export default function CreateHabitScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
-          <View style={[GlobalStyles.card, { marginBottom: 16 }]}>
-            <Text style={[GlobalStyles.title, { marginBottom: 8 }]}>
+          <View style={[GlobalStyles.card, { marginBottom: 12 }]}>
+            <Text style={[GlobalStyles.title, { marginBottom: 6 }]}>
               Crear Nuevo Hábito
             </Text>
             <Text style={GlobalStyles.caption}>
@@ -146,12 +147,12 @@ export default function CreateHabitScreen({ navigation }) {
 
           {/* Habit Title */}
           <View style={GlobalStyles.card}>
-            <Text style={[GlobalStyles.heading, { marginBottom: 16 }]}>
+            <Text style={[GlobalStyles.heading, { marginBottom: 12 }]}>
               Información del Hábito
             </Text>
             
-            <View style={{ marginBottom: 16 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 8, color: Colors.textPrimary }]}>
+            <View style={{ marginBottom: 12 }}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
                 Título del Hábito *
               </Text>
               <TextInput
@@ -164,12 +165,12 @@ export default function CreateHabitScreen({ navigation }) {
               />
             </View>
 
-            <View style={{ marginBottom: 16 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 8, color: Colors.textPrimary }]}>
+            <View style={{ marginBottom: 12 }}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
                 Descripción (opcional)
               </Text>
               <TextInput
-                style={[GlobalStyles.input, { height: 80, textAlignVertical: 'top' }]}
+                style={[GlobalStyles.input, { height: 70, textAlignVertical: 'top' }]}
                 placeholder="Describe tu hábito en detalle..."
                 placeholderTextColor={Colors.textTertiary}
                 value={description}
@@ -182,24 +183,24 @@ export default function CreateHabitScreen({ navigation }) {
 
           {/* Category Selection */}
           <View style={GlobalStyles.card}>
-            <Text style={[GlobalStyles.heading, { marginBottom: 16 }]}>
+            <Text style={[GlobalStyles.heading, { marginBottom: 12 }]}>
               Categoría *
             </Text>
-            <Text style={[GlobalStyles.caption, { marginBottom: 16 }]}>
+            <Text style={[GlobalStyles.caption, { marginBottom: 12 }]}>
               Selecciona la categoría que mejor describe tu hábito
             </Text>
             
-            <View style={{ gap: 8 }}>
+            <View style={{ gap: 6 }}>
               {categories.map(renderCategoryItem)}
             </View>
           </View>
 
           {/* Time Selection */}
           <View style={GlobalStyles.card}>
-            <Text style={[GlobalStyles.heading, { marginBottom: 16 }]}>
+            <Text style={[GlobalStyles.heading, { marginBottom: 12 }]}>
               Hora del Día
             </Text>
-            <Text style={[GlobalStyles.caption, { marginBottom: 16 }]}>
+            <Text style={[GlobalStyles.caption, { marginBottom: 12 }]}>
               ¿A qué hora prefieres realizar este hábito?
             </Text>
             
@@ -209,25 +210,25 @@ export default function CreateHabitScreen({ navigation }) {
           </View>
 
           {/* Tips */}
-          <View style={[GlobalStyles.card, { marginBottom: 24 }]}>
-            <Text style={[GlobalStyles.heading, { marginBottom: 16 }]}>
+          <View style={[GlobalStyles.card, { marginBottom: 20 }]}>
+            <Text style={[GlobalStyles.heading, { marginBottom: 12 }]}>
               💡 Consejos para el Éxito
             </Text>
-            <View style={{ gap: 12 }}>
+            <View style={{ gap: 8 }}>
               <View style={GlobalStyles.row}>
-                <Text style={{ fontSize: 16, marginRight: 8 }}>🎯</Text>
+                <Text style={{ fontSize: 14, marginRight: 6 }}>🎯</Text>
                 <Text style={GlobalStyles.caption}>
                   Comienza con hábitos pequeños y específicos
                 </Text>
               </View>
               <View style={GlobalStyles.row}>
-                <Text style={{ fontSize: 16, marginRight: 8 }}>📅</Text>
+                <Text style={{ fontSize: 14, marginRight: 6 }}>📅</Text>
                 <Text style={GlobalStyles.caption}>
                   Mantén consistencia, no perfección
                 </Text>
               </View>
               <View style={GlobalStyles.row}>
-                <Text style={{ fontSize: 16, marginRight: 8 }}>🔥</Text>
+                <Text style={{ fontSize: 14, marginRight: 6 }}>🔥</Text>
                 <Text style={GlobalStyles.caption}>
                   Construye rachas para mayor motivación
                 </Text>
@@ -240,7 +241,7 @@ export default function CreateHabitScreen({ navigation }) {
             <TouchableOpacity
               style={[
                 GlobalStyles.buttonPrimary,
-                { marginBottom: 16 },
+                { marginBottom: 20 },
                 isLoading && { opacity: 0.7 }
               ]}
               onPress={handleCreateHabit}
