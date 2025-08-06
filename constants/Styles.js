@@ -280,6 +280,46 @@ export const GlobalStyles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '600',
   },
+  
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  modalContent: {
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 12,
+    padding: 20,
+    marginHorizontal: 20,
+    alignItems: 'center',
+    shadowColor: Colors.cardShadow,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  
+  modalButton: {
+    backgroundColor: Colors.buttonPrimary,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginTop: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  
+  modalButtonText: {
+    color: Colors.buttonText,
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
 
 // Responsive design helpers

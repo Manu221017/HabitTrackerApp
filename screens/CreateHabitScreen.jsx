@@ -8,8 +8,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import Colors from '../constants/Colors';
 import GlobalStyles from '../constants/Styles';
 import { createHabit } from '../config/firebase';
@@ -31,6 +33,8 @@ export default function CreateHabitScreen({ navigation }) {
   const [category, setCategory] = useState('');
   const [time, setTime] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedTime, setSelectedTime] = useState(new Date());
 
   const handleCreateHabit = async () => {
     // Validation
@@ -97,16 +101,53 @@ export default function CreateHabitScreen({ navigation }) {
   };
 
   const handleTimeSelection = () => {
-    // Simple time picker simulation
-    const times = ['06:00', '07:00', '08:00', '09:00', '12:00', '15:00', '18:00', '20:00', '21:00'];
-    Alert.alert(
-      'Seleccionar Hora',
-      'Elige una hora para tu hábito',
-      times.map(timeOption => ({
-        text: timeOption,
-        onPress: () => setTime(timeOption)
-      }))
-    );
+    if (Platform.OS === 'android') {
+      // For Android, use the native time picker
+      try {
+        DateTimePickerAndroid.open({
+          value: selectedTime,
+          onChange: (event, date) => {
+            if (date) {
+              setSelectedTime(date);
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              setTime(`${hours}:${minutes}`);
+            }
+          },
+          mode: 'time',
+          is24Hour: true,
+        });
+      } catch (error) {
+        console.error('Error opening time picker:', error);
+        // Fallback to simple time selection
+        const times = ['06:00', '07:00', '08:00', '09:00', '12:00', '15:00', '18:00', '20:00', '21:00'];
+        Alert.alert(
+          'Seleccionar Hora',
+          'Elige una hora para tu hábito',
+          times.map(timeOption => ({
+            text: timeOption,
+            onPress: () => setTime(timeOption)
+          }))
+        );
+      }
+    } else {
+      // For iOS, show modal with time picker
+      setShowTimePicker(true);
+    }
+  };
+
+  const handleTimeConfirm = (event, date) => {
+    setShowTimePicker(false);
+    if (date) {
+      setSelectedTime(date);
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      setTime(`${hours}:${minutes}`);
+    }
+  };
+
+  const handleTimeCancel = () => {
+    setShowTimePicker(false);
   };
 
   return (
@@ -297,6 +338,32 @@ export default function CreateHabitScreen({ navigation }) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Time Picker Modal for iOS */}
+      <Modal
+        visible={showTimePicker}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={handleTimeCancel}
+      >
+        <View style={GlobalStyles.modalOverlay}>
+          <View style={GlobalStyles.modalContent}>
+            <DateTimePicker
+              value={selectedTime}
+              mode="time"
+              is24Hour={true}
+              display="default"
+              onChange={handleTimeConfirm}
+            />
+            <TouchableOpacity
+              style={GlobalStyles.modalButton}
+              onPress={handleTimeCancel}
+            >
+              <Text style={GlobalStyles.modalButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
