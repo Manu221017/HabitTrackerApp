@@ -35,29 +35,49 @@ export default function CreateHabitScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
+  const [debugInfo, setDebugInfo] = useState('');
+
+  // Debug function to log state changes
+  const logState = (action, data) => {
+    const info = `${action}: ${JSON.stringify(data)}`;
+    console.log(info);
+    setDebugInfo(prev => prev + '\n' + info);
+  };
+
+  // Clear debug info when component mounts
+  React.useEffect(() => {
+    logState('Component mounted', { title, description, category, time });
+  }, []);
 
   const handleCreateHabit = async () => {
+    logState('Creating habit started', { title, description, category, time });
+    
     // Validation
     if (!title.trim()) {
+      logState('Validation failed', 'Title is empty');
       Alert.alert('Error', 'Por favor ingresa un título para el hábito');
       return;
     }
 
     if (!description.trim()) {
+      logState('Validation failed', 'Description is empty');
       Alert.alert('Error', 'Por favor ingresa una descripción');
       return;
     }
 
     if (!category) {
+      logState('Validation failed', 'Category not selected');
       Alert.alert('Error', 'Por favor selecciona una categoría');
       return;
     }
 
     if (!time) {
+      logState('Validation failed', 'Time not selected');
       Alert.alert('Error', 'Por favor selecciona una hora');
       return;
     }
 
+    logState('Validation passed', 'All fields are valid');
     setIsLoading(true);
 
     try {
@@ -69,9 +89,11 @@ export default function CreateHabitScreen({ navigation }) {
         status: 'pending'
       };
 
+      logState('Sending habit data', habitData);
       const result = await createHabit(habitData);
 
       if (result.success) {
+        logState('Habit created successfully', result);
         Alert.alert(
           '¡Éxito!',
           'Hábito creado exitosamente',
@@ -79,6 +101,7 @@ export default function CreateHabitScreen({ navigation }) {
             {
               text: 'OK',
               onPress: () => {
+                logState('Navigating back after success', '');
                 // Clear form and navigate back
                 setTitle('');
                 setDescription('');
@@ -90,12 +113,15 @@ export default function CreateHabitScreen({ navigation }) {
           ]
         );
       } else {
+        logState('Habit creation failed', result.error);
         Alert.alert('Error', result.error || 'Error al crear el hábito');
       }
     } catch (error) {
+      logState('Unexpected error', error.message);
       console.error('Error creating habit:', error);
       Alert.alert('Error', 'Ocurrió un error inesperado. Intenta de nuevo.');
     } finally {
+      logState('Loading state ended', '');
       setIsLoading(false);
     }
   };
@@ -107,12 +133,25 @@ export default function CreateHabitScreen({ navigation }) {
         DateTimePickerAndroid.open({
           value: selectedTime,
           onChange: (event, date) => {
-            if (date) {
+            console.log('Time picker event:', event, 'date:', date);
+            
+            // Handle the event properly
+            if (event.type === 'set' && date) {
               setSelectedTime(date);
               const hours = date.getHours().toString().padStart(2, '0');
               const minutes = date.getMinutes().toString().padStart(2, '0');
-              setTime(`${hours}:${minutes}`);
+              const timeString = `${hours}:${minutes}`;
+              console.log('Setting time to:', timeString);
+              setTime(timeString);
+            } else if (event.type === 'dismissed') {
+              console.log('Time picker dismissed');
+              // Don't change anything if dismissed
             }
+          },
+          onError: (error) => {
+            console.error('Time picker error:', error);
+            // Fallback to simple time selection
+            showTimeSelectionFallback();
           },
           mode: 'time',
           is24Hour: true,
@@ -120,15 +159,7 @@ export default function CreateHabitScreen({ navigation }) {
       } catch (error) {
         console.error('Error opening time picker:', error);
         // Fallback to simple time selection
-        const times = ['06:00', '07:00', '08:00', '09:00', '12:00', '15:00', '18:00', '20:00', '21:00'];
-        Alert.alert(
-          'Seleccionar Hora',
-          'Elige una hora para tu hábito',
-          times.map(timeOption => ({
-            text: timeOption,
-            onPress: () => setTime(timeOption)
-          }))
-        );
+        showTimeSelectionFallback();
       }
     } else {
       // For iOS, show modal with time picker
@@ -136,17 +167,44 @@ export default function CreateHabitScreen({ navigation }) {
     }
   };
 
+  const showTimeSelectionFallback = () => {
+    const times = ['06:00', '07:00', '08:00', '09:00', '12:00', '15:00', '18:00', '20:00', '21:00'];
+    Alert.alert(
+      'Seleccionar Hora',
+      'Elige una hora para tu hábito',
+      [
+        ...times.map(timeOption => ({
+          text: timeOption,
+          onPress: () => {
+            console.log('Fallback time selected:', timeOption);
+            setTime(timeOption);
+          }
+        })),
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+          onPress: () => console.log('Time selection cancelled')
+        }
+      ],
+      { cancelable: true }
+    );
+  };
+
   const handleTimeConfirm = (event, date) => {
+    console.log('iOS time picker confirm:', event, 'date:', date);
     setShowTimePicker(false);
     if (date) {
       setSelectedTime(date);
       const hours = date.getHours().toString().padStart(2, '0');
       const minutes = date.getMinutes().toString().padStart(2, '0');
-      setTime(`${hours}:${minutes}`);
+      const timeString = `${hours}:${minutes}`;
+      console.log('Setting time to:', timeString);
+      setTime(timeString);
     }
   };
 
   const handleTimeCancel = () => {
+    console.log('Time picker cancelled');
     setShowTimePicker(false);
   };
 
@@ -306,6 +364,35 @@ export default function CreateHabitScreen({ navigation }) {
                 Cancelar
               </Text>
             </TouchableOpacity>
+
+            {/* Reset Button - Only in development */}
+            {__DEV__ && (
+              <TouchableOpacity
+                style={[
+                  GlobalStyles.buttonSecondary,
+                  { 
+                    marginBottom: 12,
+                    backgroundColor: Colors.accent + '20',
+                    borderColor: Colors.accent
+                  }
+                ]}
+                onPress={() => {
+                  logState('Reset button pressed', '');
+                  setTitle('');
+                  setDescription('');
+                  setCategory('');
+                  setTime('');
+                  setSelectedTime(new Date());
+                  setShowTimePicker(false);
+                  setDebugInfo('');
+                }}
+                disabled={isLoading}
+              >
+                <Text style={[GlobalStyles.buttonTextSecondary, { color: Colors.accent }]}>
+                  🔄 Reset (Debug)
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Tips */}
@@ -339,27 +426,72 @@ export default function CreateHabitScreen({ navigation }) {
         </ScrollView>
       </KeyboardAvoidingView>
 
+      {/* Debug Info - Only show in development */}
+      {__DEV__ && debugInfo && (
+        <View style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: 10,
+          maxHeight: 100,
+        }}>
+          <Text style={{ color: 'white', fontSize: 10 }}>
+            Debug: {debugInfo.split('\n').slice(-3).join('\n')}
+          </Text>
+        </View>
+      )}
+
       {/* Time Picker Modal for iOS */}
       <Modal
         visible={showTimePicker}
         animationType="slide"
         transparent={true}
         onRequestClose={handleTimeCancel}
+        presentationStyle="pageSheet"
       >
         <View style={GlobalStyles.modalOverlay}>
-          <View style={GlobalStyles.modalContent}>
+          <View style={[GlobalStyles.modalContent, { padding: 20 }]}>
+            <View style={{ 
+              flexDirection: 'row', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              marginBottom: 20,
+              borderBottomWidth: 1,
+              borderBottomColor: Colors.cardBorder,
+              paddingBottom: 15
+            }}>
+              <Text style={[GlobalStyles.subtitle, { color: Colors.textPrimary }]}>
+                Seleccionar Hora
+              </Text>
+              <TouchableOpacity onPress={handleTimeCancel}>
+                <Text style={{ color: Colors.primary, fontSize: 16, fontWeight: '600' }}>
+                  Cancelar
+                </Text>
+              </TouchableOpacity>
+            </View>
+            
             <DateTimePicker
               value={selectedTime}
               mode="time"
               is24Hour={true}
-              display="default"
+              display="spinner"
               onChange={handleTimeConfirm}
+              style={{ marginBottom: 20 }}
             />
+            
             <TouchableOpacity
-              style={GlobalStyles.modalButton}
-              onPress={handleTimeCancel}
+              style={[GlobalStyles.buttonPrimary, { marginTop: 10 }]}
+              onPress={() => {
+                const hours = selectedTime.getHours().toString().padStart(2, '0');
+                const minutes = selectedTime.getMinutes().toString().padStart(2, '0');
+                const timeString = `${hours}:${minutes}`;
+                setTime(timeString);
+                setShowTimePicker(false);
+              }}
             >
-              <Text style={GlobalStyles.modalButtonText}>Cancelar</Text>
+              <Text style={GlobalStyles.buttonText}>Confirmar Hora</Text>
             </TouchableOpacity>
           </View>
         </View>

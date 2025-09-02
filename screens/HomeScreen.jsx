@@ -7,12 +7,15 @@ import {
   FlatList,
   Alert,
   RefreshControl,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
 import GlobalStyles from '../constants/Styles';
 import { useAuth } from '../contexts/AuthContext';
 import { useHabits } from '../contexts/HabitsContext';
+import GamificationCard from '../components/GamificationCard';
+import QuickStatsCard from '../components/QuickStatsCard';
 import { logOut, updateHabitStatus } from '../config/firebase';
 
 export default function HomeScreen({ navigation }) {
@@ -70,6 +73,18 @@ export default function HomeScreen({ navigation }) {
         Alert.alert('Error', result.error || 'Error al actualizar el hábito');
       }
       // No need to update local state - HabitsContext will handle it automatically
+    } catch (error) {
+      console.error('Error updating habit:', error);
+      Alert.alert('Error', 'Error al actualizar el hábito');
+    }
+  };
+
+  const markHabitCompleted = async (habitId) => {
+    try {
+      const result = await updateHabitStatus(habitId, 'completed');
+      if (!result.success) {
+        Alert.alert('Error', result.error || 'Error al actualizar el hábito');
+      }
     } catch (error) {
       console.error('Error updating habit:', error);
       Alert.alert('Error', 'Error al actualizar el hábito');
@@ -211,6 +226,18 @@ export default function HomeScreen({ navigation }) {
     </View>
   );
 
+  const parseTimeToMinutes = (timeStr) => {
+    if (!timeStr || typeof timeStr !== 'string' || !timeStr.includes(':')) return 24 * 60;
+    const [h, m] = timeStr.split(':').map(Number);
+    return (h % 24) * 60 + (m % 60);
+  };
+
+  const todaysReminders = habits
+    .filter(h => (h.reminderEnabled || h.time) && h.status !== 'completed')
+    .slice()
+    .sort((a, b) => parseTimeToMinutes(a.reminderTime || a.time) - parseTimeToMinutes(b.reminderTime || b.time))
+    .slice(0, 3);
+
   return (
     <SafeAreaView style={GlobalStyles.safeArea}>
       <ScrollView 
@@ -280,6 +307,32 @@ export default function HomeScreen({ navigation }) {
           </Text>
         </View>
 
+        {/* Today's Reminders */}
+        {todaysReminders.length > 0 && (
+          <View style={[GlobalStyles.card, { marginBottom: 12 }]}> 
+            <View style={[GlobalStyles.rowSpaceBetween, { marginBottom: 8 }]}>
+              <Text style={GlobalStyles.subtitle}>Recordatorios de hoy</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Reminders')}>
+                <Text style={[GlobalStyles.smallText, { color: Colors.primary }]}>Configurar</Text>
+              </TouchableOpacity>
+            </View>
+            {todaysReminders.map(h => (
+              <View key={h.id} style={[GlobalStyles.rowSpaceBetween, { paddingVertical: 6 }]}>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={GlobalStyles.heading} numberOfLines={1}>{h.title}</Text>
+                  <Text style={GlobalStyles.smallText}>⏰ {h.reminderTime || h.time}</Text>
+                </View>
+                <TouchableOpacity
+                  style={[GlobalStyles.buttonSmall, { backgroundColor: Colors.success }]}
+                  onPress={() => markHabitCompleted(h.id)}
+                >
+                  <Text style={GlobalStyles.buttonText}>Hecho</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        )}
+
         {/* Stats Cards */}
         {habits.length > 0 && (
           <View style={[GlobalStyles.row, { marginBottom: 12 }]}>
@@ -298,6 +351,12 @@ export default function HomeScreen({ navigation }) {
             </View>
           </View>
         )}
+
+        {/* Tarjeta de Gamificación */}
+        {habits.length > 0 && <GamificationCard navigation={navigation} />}
+
+        {/* Tarjeta de Estadísticas Rápidas */}
+        {habits.length > 0 && <QuickStatsCard navigation={navigation} />}
 
         {/* Habits List */}
         <View style={{ marginBottom: 12 }}>
@@ -334,23 +393,64 @@ export default function HomeScreen({ navigation }) {
 
         {/* Quick Actions */}
         <View style={[GlobalStyles.card, { marginBottom: 24 }]}>
-          <Text style={[GlobalStyles.heading, { marginBottom: 12 }]}>
+          <Text style={[GlobalStyles.heading, { marginBottom: 16 }]}>
             Acciones Rápidas
           </Text>
           
-          <View style={GlobalStyles.row}>
+          {/* Primera fila */}
+          <View style={styles.actionRow}>
             <TouchableOpacity
-              style={[GlobalStyles.buttonSecondary, { flex: 1, marginRight: 6 }]}
-              onPress={() => Alert.alert('Próximamente', 'Función de estadísticas detalladas')}
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('AdvancedStatistics')}
             >
-              <Text style={GlobalStyles.buttonTextSecondary}>📊 Estadísticas</Text>
+              <Text style={styles.actionButtonText}>📊 Estadísticas</Text>
+              <Text style={styles.actionButtonSubtext}>Avanzadas</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
-              style={[GlobalStyles.buttonSecondary, { flex: 1, marginLeft: 6 }]}
-              onPress={() => Alert.alert('Próximamente', 'Función de recordatorios')}
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('Reminders')}
             >
-              <Text style={GlobalStyles.buttonTextSecondary}>⏰ Recordatorios</Text>
+              <Text style={styles.actionButtonText}>⏰ Recordatorios</Text>
+              <Text style={styles.actionButtonSubtext}>Configurar</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Segunda fila */}
+          <View style={styles.actionRow}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('Calendar')}
+            >
+              <Text style={styles.actionButtonText}>📆 Calendario</Text>
+              <Text style={styles.actionButtonSubtext}>Ver progreso</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('NotificationSettings')}
+            >
+              <Text style={styles.actionButtonText}>🔔 Notificaciones</Text>
+              <Text style={styles.actionButtonSubtext}>Configurar</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Tercera fila */}
+          <View style={styles.actionRow}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('Gamification')}
+            >
+              <Text style={styles.actionButtonText}>🎮 Gamificación</Text>
+              <Text style={styles.actionButtonSubtext}>Ver logros</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('CreateHabit')}
+            >
+              <Text style={styles.actionButtonText}>➕ Crear Hábito</Text>
+              <Text style={styles.actionButtonSubtext}>Nuevo</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -358,3 +458,45 @@ export default function HomeScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  actionButton: {
+    flex: 1,
+    backgroundColor: Colors.backgroundSecondary,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.cardBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 4,
+    minHeight: 80,
+    shadowColor: Colors.primary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  actionButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  actionButtonSubtext: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+});

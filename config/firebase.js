@@ -20,7 +20,8 @@ import {
   where, 
   getDocs, 
   orderBy,
-  serverTimestamp 
+  serverTimestamp,
+  setDoc
 } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -224,6 +225,13 @@ export const updateHabitStatus = async (habitId, status, date = new Date()) => {
       updatedAt: serverTimestamp()
     });
 
+    // Persist daily log for calendar/stats
+    try {
+      await setHabitLogStatus(habitId, date, status, user.uid);
+    } catch (e) {
+      console.warn('No se pudo guardar el log del hábito:', e?.message || e);
+    }
+
     return { 
       success: true, 
       habit: { 
@@ -258,6 +266,93 @@ export const deleteHabit = async (habitId) => {
   } catch (error) {
     console.error('Error deleting habit:', error);
     return { success: false, error: 'Error al eliminar el hábito' };
+  }
+};
+
+// ------------------------------
+// Logs diarios para calendario/estadísticas
+// ------------------------------
+
+const formatDateParts = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return {
+    year,
+    month,
+    day,
+    dateKey: `${year}-${month}-${day}`,
+    monthKey: `${year}-${month}`,
+  };
+};
+
+export const setHabitLogStatus = async (habitId, date, status, forcedUserId) => {
+  const user = forcedUserId ? { uid: forcedUserId } : getCurrentUser();
+  if (!user) {
+    return { success: false, error: 'Usuario no autenticado' };
+  }
+  const { dateKey, monthKey, year, month, day } = formatDateParts(date instanceof Date ? date : new Date(date));
+  // Deterministic document id to avoid duplicates per habit/day
+  const logId = `${user.uid}_${habitId}_${dateKey}`;
+  const logRef = doc(db, 'habitLogs', logId);
+  await setDoc(logRef, {
+    id: logId,
+    userId: user.uid,
+    habitId,
+    status,
+    dateKey,
+    monthKey,
+    year,
+    month,
+    day,
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
+  return { success: true };
+};
+
+export const getLogsByMonth = async (year, month) => {
+  try {
+    const user = getCurrentUser();
+    if (!user) {
+      return { success: false, error: 'Usuario no autenticado' };
+    }
+    const monthKey = `${String(year)}-${String(month).padStart(2, '0')}`;
+    const q = query(
+      collection(db, 'habitLogs'),
+      where('userId', '==', user.uid),
+      where('monthKey', '==', monthKey)
+    );
+    const snap = await getDocs(q);
+    const logs = [];
+    snap.forEach(d => logs.push({ id: d.id, ...d.data() }));
+    return { success: true, logs };
+  } catch (error) {
+    console.error('Error getting logs by month:', error);
+    return { success: false, error: 'Error al obtener registros' };
+  }
+};
+
+// ------------------------------
+// Recordatorios (metadata en Firestore)
+// ------------------------------
+
+export const updateHabitReminder = async (habitId, fields) => {
+  try {
+    const user = getCurrentUser();
+    if (!user) {
+      return { success: false, error: 'Usuario no autenticado' };
+    }
+    const habitRef = doc(db, 'habits', habitId);
+    await updateDoc(habitRef, {
+      reminderEnabled: !!fields.reminderEnabled,
+      reminderTime: fields.reminderTime || null, // 'HH:mm'
+      notificationId: fields.notificationId || null,
+      updatedAt: serverTimestamp(),
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating habit reminder:', error);
+    return { success: false, error: 'Error al actualizar el recordatorio' };
   }
 };
 

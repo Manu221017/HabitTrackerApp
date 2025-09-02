@@ -3,6 +3,7 @@ import { onSnapshot, query, where, orderBy } from 'firebase/firestore';
 import { collection } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from './AuthContext';
+import GamificationService from '../services/GamificationService';
 
 const HabitsContext = createContext({});
 
@@ -74,6 +75,85 @@ export const HabitsProvider = ({ children }) => {
       if (habits.length === 0) return 0;
       const completed = habits.filter(h => h.status === 'completed').length;
       return Math.round((completed / habits.length) * 100) || 0;
+    },
+    // Gamification functions
+    completeHabit: async (habitId) => {
+      try {
+        const habit = habits.find(h => h.id === habitId);
+        if (!habit) return false;
+        
+        // Calcular puntos por completar el hábito
+        const points = GamificationService.calculateHabitPoints(habit, habit.streak || 0);
+        
+        // Obtener progreso actual del usuario
+        const currentProgress = await GamificationService.getUserProgress(user.uid);
+        
+        // Actualizar puntos y verificar si subió de nivel
+        const newTotalPoints = currentProgress.totalPoints + points;
+        const newLevel = GamificationService.calculateLevel(newTotalPoints);
+        const levelUp = newLevel > currentProgress.level;
+        
+        // Actualizar progreso
+        const updatedProgress = {
+          ...currentProgress,
+          totalPoints: newTotalPoints,
+          level: newLevel,
+          stats: {
+            ...currentProgress.stats,
+            totalHabitsCompleted: currentProgress.stats.totalHabitsCompleted + 1
+          },
+          lastUpdated: new Date().toISOString()
+        };
+        
+        // Guardar progreso actualizado
+        await GamificationService.saveUserProgress(user.uid, updatedProgress);
+        
+        // Verificar logros
+        const userStats = {
+          totalHabits: habits.length,
+          completedHabits: habits.filter(h => h.status === 'completed').length + 1,
+          bestStreak: Math.max(...habits.map(h => h.streak || 0)),
+          totalCompletions: habits.reduce((sum, h) => sum + (h.totalCompletions || 0), 0) + 1,
+          categoriesCompleted: new Set(habits.map(h => h.category)).size,
+        };
+        
+        const newAchievements = await GamificationService.checkAchievements(userStats, user.uid);
+        
+        // Notificar subida de nivel si ocurrió
+        if (levelUp) {
+          const rewards = GamificationService.getLevelRewards(newLevel);
+          await GamificationService.notifyLevelUp(newLevel, rewards);
+        }
+        
+        // Notificar logros desbloqueados
+        for (const achievement of newAchievements) {
+          if (!currentProgress.achievements.find(a => a.id === achievement.id)) {
+            await GamificationService.notifyAchievement(achievement);
+          }
+        }
+        
+        return { success: true, points, levelUp, newAchievements };
+      } catch (error) {
+        console.error('Error al completar hábito con gamificación:', error);
+        return { success: false, error };
+      }
+    },
+    getGamificationStats: async () => {
+      try {
+        const progress = await GamificationService.getUserProgress(user.uid);
+        const userStats = {
+          totalHabits: habits.length,
+          completedHabits: habits.filter(h => h.status === 'completed').length,
+          bestStreak: Math.max(...habits.map(h => h.streak || 0)),
+          totalCompletions: habits.reduce((sum, h) => sum + (h.totalCompletions || 0), 0),
+          categoriesCompleted: new Set(habits.map(h => h.category)).size,
+        };
+        
+        return GamificationService.calculateGamificationStats(userStats, progress);
+      } catch (error) {
+        console.error('Error al obtener estadísticas de gamificación:', error);
+        return null;
+      }
     }
   };
 
