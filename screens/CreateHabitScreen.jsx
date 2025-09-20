@@ -15,6 +15,7 @@ import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/d
 import Colors from '../constants/Colors';
 import GlobalStyles from '../constants/Styles';
 import { createHabit } from '../config/firebase';
+import Toast from 'react-native-toast-message';
 
 const categories = [
   'Salud',
@@ -94,24 +95,18 @@ export default function CreateHabitScreen({ navigation }) {
 
       if (result.success) {
         logState('Habit created successfully', result);
-        Alert.alert(
-          '¡Éxito!',
-          'Hábito creado exitosamente',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                logState('Navigating back after success', '');
-                // Clear form and navigate back
-                setTitle('');
-                setDescription('');
-                setCategory('');
-                setTime('');
-                navigation.goBack();
-              }
-            }
-          ]
-        );
+        Toast.show({
+          type: 'success',
+          text1: '¡Hábito creado!',
+          position: 'bottom',
+          visibilityTime: 1500,
+        });
+        // Clear form and navigate back
+        setTitle('');
+        setDescription('');
+        setCategory('');
+        setTime('');
+        navigation.goBack();
       } else {
         logState('Habit creation failed', result.error);
         Alert.alert('Error', result.error || 'Error al crear el hábito');

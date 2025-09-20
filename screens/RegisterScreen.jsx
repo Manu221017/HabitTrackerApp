@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
 import GlobalStyles from '../constants/Styles';
 import { signUp } from '../config/firebase';
+import Toast from 'react-native-toast-message';
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -48,11 +49,13 @@ export default function RegisterScreen({ navigation }) {
       const result = await signUp(email, password, name);
       
       if (result.success) {
-        Alert.alert(
-          '¡Éxito!', 
-          'Cuenta creada exitosamente. Ya puedes iniciar sesión.',
-          [{ text: 'OK' }]
-        );
+        Toast.show({
+          type: 'success',
+          text1: '¡Cuenta creada!',
+          text2: 'Ya puedes iniciar sesión.',
+          position: 'bottom',
+          visibilityTime: 1800,
+        });
         // Clear form after successful registration
         setName('');
         setEmail('');

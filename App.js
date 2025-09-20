@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
+import Toast from 'react-native-toast-message';
 
 // Import screens
 import LoginScreen from './screens/LoginScreen';
@@ -170,6 +171,7 @@ export default function App() {
           <NavigationContainer>
             <NavigationContent />
           </NavigationContainer>
+          <Toast />
         </HabitsProvider>
       </AuthProvider>
     </SafeAreaProvider>

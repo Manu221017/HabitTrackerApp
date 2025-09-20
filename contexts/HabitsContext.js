@@ -87,7 +87,7 @@ export const HabitsProvider = ({ children }) => {
         
         // Obtener progreso actual del usuario
         const currentProgress = await GamificationService.getUserProgress(user.uid);
-        
+     
         // Actualizar puntos y verificar si subió de nivel
         const newTotalPoints = currentProgress.totalPoints + points;
         const newLevel = GamificationService.calculateLevel(newTotalPoints);

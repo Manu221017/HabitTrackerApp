@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Alert,
   RefreshControl,
   StyleSheet,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
@@ -17,6 +18,55 @@ import { useHabits } from '../contexts/HabitsContext';
 import GamificationCard from '../components/GamificationCard';
 import QuickStatsCard from '../components/QuickStatsCard';
 import { logOut, updateHabitStatus } from '../config/firebase';
+import Toast from 'react-native-toast-message';
+
+// Componente para el botón animado de check
+function HabitCheckButton({ status, onPress }) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.85,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onPress();
+    });
+  };
+
+  return (
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+      <TouchableOpacity
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 18,
+          backgroundColor: status === 'completed' ? Colors.habitCompleted : Colors.backgroundSecondary,
+          justifyContent: 'center',
+          alignItems: 'center',
+          borderWidth: 2,
+          borderColor: status === 'completed' ? Colors.habitCompleted : Colors.cardBorder,
+        }}
+        onPress={handlePress}
+        activeOpacity={0.8}
+      >
+        <Text style={{
+          fontSize: 16,
+          color: status === 'completed' ? Colors.textInverse : Colors.textSecondary,
+        }}>
+          {status === 'completed' ? '✓' : '○'}
+        </Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
 
 export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
@@ -71,6 +121,13 @@ export default function HomeScreen({ navigation }) {
       
       if (!result.success) {
         Alert.alert('Error', result.error || 'Error al actualizar el hábito');
+      } else if (newStatus === 'completed') {
+        Toast.show({
+          type: 'success',
+          text1: '¡Hábito completado!',
+          position: 'bottom',
+          visibilityTime: 1500,
+        });
       }
       // No need to update local state - HabitsContext will handle it automatically
     } catch (error) {
@@ -132,7 +189,6 @@ export default function HomeScreen({ navigation }) {
           <Text style={[GlobalStyles.caption, { marginBottom: 6 }]} numberOfLines={2}>
             {item.description}
           </Text>
-          
           <View style={GlobalStyles.row}>
             <View style={{
               backgroundColor: getStatusColor(item.status),
@@ -145,7 +201,6 @@ export default function HomeScreen({ navigation }) {
                 {getStatusText(item.status)}
               </Text>
             </View>
-            
             <View style={{
               backgroundColor: Colors.backgroundSecondary,
               paddingHorizontal: 6,
@@ -158,34 +213,16 @@ export default function HomeScreen({ navigation }) {
             </View>
           </View>
         </View>
-        
-        <TouchableOpacity
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            backgroundColor: item.status === 'completed' ? Colors.habitCompleted : Colors.backgroundSecondary,
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 2,
-            borderColor: item.status === 'completed' ? Colors.habitCompleted : Colors.cardBorder,
-          }}
+        <HabitCheckButton
+          status={item.status}
           onPress={() => toggleHabitStatus(item.id, item.status)}
-        >
-          <Text style={{
-            fontSize: 16,
-            color: item.status === 'completed' ? Colors.textInverse : Colors.textSecondary,
-          }}>
-            {item.status === 'completed' ? '✓' : '○'}
-          </Text>
-        </TouchableOpacity>
+        />
       </View>
-      
-      <View style={[GlobalStyles.rowSpaceBetween, { marginTop: 8 }]}>
+      <View style={[GlobalStyles.rowSpaceBetween, { marginTop: 8 }]}> 
         <Text style={[GlobalStyles.smallText, { color: Colors.textTertiary }]} numberOfLines={1}>
           📅 {item.category}
         </Text>
-        <Text style={[GlobalStyles.smallText, { color: Colors.textTertiary }]}>
+        <Text style={[GlobalStyles.smallText, { color: Colors.textTertiary }]}> 
           ⏰ {item.time}
         </Text>
       </View>
@@ -455,6 +492,7 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
       </ScrollView>
+      <Toast />
     </SafeAreaView>
   );
 }

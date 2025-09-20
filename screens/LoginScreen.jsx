@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
 import GlobalStyles from '../constants/Styles';
 import { signIn } from '../config/firebase';
+import Toast from 'react-native-toast-message';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -36,6 +37,13 @@ export default function LoginScreen({ navigation }) {
       const result = await signIn(email, password);
       
       if (result.success) {
+        Toast.show({
+          type: 'success',
+          text1: '¡Bienvenido!',
+          text2: 'Inicio de sesión exitoso',
+          position: 'bottom',
+          visibilityTime: 1500,
+        });
         // Login successful - navigation will be handled by AuthContext
         console.log('Login successful:', result.user.email);
       } else {

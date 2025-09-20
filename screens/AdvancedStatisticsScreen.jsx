@@ -94,7 +94,7 @@ export default function AdvancedStatisticsScreen({ navigation }) {
               <Text style={styles.summaryLabel}>Activos</Text>
             </View>
             <View style={styles.summaryCard}>
-              <Text style={styles.summaryValue}>{Math.round(summary.completionRate * 100) / 100}</Text>
+              <Text style={styles.summaryValue}>{summary && summary.completionRate !== undefined ? Math.round(summary.completionRate * 100) / 100 : 'Cargando...'}</Text>
               <Text style={styles.summaryLabel}>Tasa Completación</Text>
             </View>
             <View style={styles.summaryCard}>
@@ -117,19 +117,19 @@ export default function AdvancedStatisticsScreen({ navigation }) {
               <Text style={styles.factorTitle}>Factores:</Text>
               <View style={styles.factorItem}>
                 <Text style={styles.factorLabel}>Tasa de Completación</Text>
-                <Text style={styles.factorValue}>{productivity.factors.completionRate}%</Text>
+                <Text style={styles.factorValue}>{productivity && productivity.factors && productivity.factors.completionRate !== undefined ? productivity.factors.completionRate + '%' : 'Cargando...'}</Text>
               </View>
               <View style={styles.factorItem}>
                 <Text style={styles.factorLabel}>Bonus por Rachas</Text>
-                <Text style={styles.factorValue}>+{productivity.factors.streakBonus}</Text>
+                <Text style={styles.factorValue}>{productivity && productivity.factors && productivity.factors.streakBonus !== undefined ? '+' + productivity.factors.streakBonus : 'Cargando...'}</Text>
               </View>
               <View style={styles.factorItem}>
                 <Text style={styles.factorLabel}>Bonus por Consistencia</Text>
-                <Text style={styles.factorValue}>+{productivity.factors.consistencyBonus}</Text>
+                <Text style={styles.factorValue}>{productivity && productivity.factors && productivity.factors.consistencyBonus !== undefined ? '+' + productivity.factors.consistencyBonus : 'Cargando...'}</Text>
               </View>
               <View style={styles.factorItem}>
                 <Text style={styles.factorLabel}>Bonus por Variedad</Text>
-                <Text style={styles.factorValue}>+{productivity.factors.varietyBonus}</Text>
+                <Text style={styles.factorValue}>{productivity && productivity.factors && productivity.factors.varietyBonus !== undefined ? '+' + productivity.factors.varietyBonus : 'Cargando...'}</Text>
               </View>
             </View>
           </View>
@@ -240,7 +240,7 @@ export default function AdvancedStatisticsScreen({ navigation }) {
               <View style={styles.categoryStats}>
                 <View style={styles.categoryStat}>
                   <Text style={styles.categoryStatLabel}>Completación</Text>
-                  <Text style={styles.categoryStatValue}>{Math.round(data.completionRate)}%</Text>
+                  <Text style={styles.categoryStatValue}>{data && data.completionRate !== undefined ? Math.round(data.completionRate) + '%' : 'Cargando...'}</Text>
                 </View>
                 <View style={styles.categoryStat}>
                   <Text style={styles.categoryStatLabel}>Racha Promedio</Text>
