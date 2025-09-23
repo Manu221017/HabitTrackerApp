@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,9 @@ import {
   RefreshControl,
   StyleSheet,
   Animated,
+  Dimensions,
 } from 'react-native';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
 import GlobalStyles from '../constants/Styles';
@@ -72,6 +74,7 @@ export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
   const { 
     habits, 
+    todaysHabits,
     loading, 
     error, 
     setError,
@@ -80,6 +83,16 @@ export default function HomeScreen({ navigation }) {
     getBestStreak
   } = useHabits();
   const [refreshing, setRefreshing] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const { width } = Dimensions.get('window');
+
+  useEffect(() => {
+    const progress = getProgressPercentage();
+    if (progress === 100 && todaysHabits.length > 0) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 2000);
+    }
+  }, [getProgressPercentage, todaysHabits.length]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -277,6 +290,14 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={GlobalStyles.safeArea}>
+      {showConfetti && (
+        <ConfettiCannon
+          count={80}
+          origin={{ x: width / 2, y: 0 }}
+          fadeOut
+          fallSpeed={3000}
+        />
+      )}
       <ScrollView 
         style={GlobalStyles.container} 
         showsVerticalScrollIndicator={false}
@@ -340,7 +361,7 @@ export default function HomeScreen({ navigation }) {
           </View>
           
           <Text style={[GlobalStyles.caption, { marginTop: 6 }]}>
-            {habits.filter(h => h.status === 'completed').length} de {habits.length} hábitos completados
+            {todaysHabits.filter(h => h.status === 'completed').length} de {todaysHabits.length} hábitos completados
           </Text>
         </View>
 
@@ -399,7 +420,7 @@ export default function HomeScreen({ navigation }) {
         <View style={{ marginBottom: 12 }}>
           <View style={[GlobalStyles.rowSpaceBetween, { marginBottom: 12, paddingHorizontal: 12 }]}>
             <Text style={GlobalStyles.subtitle}>
-              Mis Hábitos ({habits.length})
+              Mis Hábitos ({todaysHabits.length})
             </Text>
             <TouchableOpacity
               style={GlobalStyles.buttonSmall}
@@ -415,11 +436,11 @@ export default function HomeScreen({ navigation }) {
             </View>
           ) : error ? (
             renderErrorState()
-          ) : habits.length === 0 ? (
+          ) : todaysHabits.length === 0 ? (
             renderEmptyState()
           ) : (
             <FlatList
-              data={habits}
+              data={todaysHabits}
               renderItem={renderHabitCard}
               keyExtractor={item => item.id}
               scrollEnabled={false}

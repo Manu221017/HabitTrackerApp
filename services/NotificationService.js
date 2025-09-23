@@ -300,11 +300,13 @@ class NotificationService {
 
   // Limpiar listeners
   cleanup() {
-    if (this.notificationListener) {
-      Notifications.removeNotificationSubscription(this.notificationListener);
+    if (this.notificationListener && typeof this.notificationListener.remove === 'function') {
+      this.notificationListener.remove();
+      this.notificationListener = null;
     }
-    if (this.responseListener) {
-      Notifications.removeNotificationSubscription(this.responseListener);
+    if (this.responseListener && typeof this.responseListener.remove === 'function') {
+      this.responseListener.remove();
+      this.responseListener = null;
     }
   }
 

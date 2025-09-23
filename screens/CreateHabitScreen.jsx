@@ -28,6 +28,8 @@ const categories = [
   'Otros'
 ];
 
+const dayLabels = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+
 export default function CreateHabitScreen({ navigation }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -37,6 +39,7 @@ export default function CreateHabitScreen({ navigation }) {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [debugInfo, setDebugInfo] = useState('');
+  const [daysOfWeek, setDaysOfWeek] = useState([]); // 0..6 Domingo..Sábado
 
   // Debug function to log state changes
   const logState = (action, data) => {
@@ -87,7 +90,8 @@ export default function CreateHabitScreen({ navigation }) {
         description: description.trim(),
         category,
         time,
-        status: 'pending'
+        status: 'pending',
+        daysOfWeek, // nuevo campo
       };
 
       logState('Sending habit data', habitData);
@@ -106,6 +110,7 @@ export default function CreateHabitScreen({ navigation }) {
         setDescription('');
         setCategory('');
         setTime('');
+        setDaysOfWeek([]);
         navigation.goBack();
       } else {
         logState('Habit creation failed', result.error);
@@ -304,6 +309,38 @@ export default function CreateHabitScreen({ navigation }) {
             </View>
 
             {/* Time Selection */}
+            <View style={{ marginBottom: 16 }}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
+                Días de la semana (si no eliges, será diario)
+              </Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                {dayLabels.map((label, idx) => (
+                  <TouchableOpacity
+                    key={label}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: daysOfWeek.includes(idx) ? Colors.primary : Colors.backgroundSecondary,
+                      borderWidth: 1,
+                      borderColor: daysOfWeek.includes(idx) ? Colors.primary : Colors.cardBorder,
+                    }}
+                    onPress={() => {
+                      setDaysOfWeek(prev => prev.includes(idx) ? prev.filter(d => d !== idx) : [...prev, idx]);
+                    }}
+                    disabled={isLoading}
+                  >
+                    <Text style={{ color: daysOfWeek.includes(idx) ? Colors.textInverse : Colors.textSecondary, fontWeight: '600' }}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Time Selection */}
             <View style={{ marginBottom: 24 }}>
               <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
                 Hora del Día *
@@ -379,6 +416,7 @@ export default function CreateHabitScreen({ navigation }) {
                   setTime('');
                   setSelectedTime(new Date());
                   setShowTimePicker(false);
+                  setDaysOfWeek([]);
                   setDebugInfo('');
                 }}
                 disabled={isLoading}

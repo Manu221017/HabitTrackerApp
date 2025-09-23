@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
 import { onSnapshot, query, where, orderBy } from 'firebase/firestore';
 import { collection } from 'firebase/firestore';
 import { db } from '../config/firebase';
@@ -59,22 +59,50 @@ export const HabitsProvider = ({ children }) => {
     return () => unsubscribe();
   }, [user]);
 
+  const todayIndex = new Date().getDay(); // 0 = Domingo ... 6 = Sábado
+  const todaysHabits = useMemo(() => {
+    return habits.filter(h => {
+      const days = Array.isArray(h.daysOfWeek) ? h.daysOfWeek : [];
+      if (days.length === 0) return true; // Sin configuración => aparece todos los días
+      // Normalizar posibles strings a índices si existieran
+      const normalized = days.map(d => {
+        if (typeof d === 'number') return d;
+        if (typeof d === 'string') {
+          const lower = d.toLowerCase();
+          const map = {
+            'domingo': 0, 'dom': 0, 'sun': 0,
+            'lunes': 1, 'lun': 1, 'mon': 1,
+            'martes': 2, 'mar': 2, 'tue': 2,
+            'miércoles': 3, 'miercoles': 3, 'mié': 3, 'mie': 3, 'wed': 3,
+            'jueves': 4, 'jue': 4, 'thu': 4,
+            'viernes': 5, 'vie': 5, 'fri': 5,
+            'sábado': 6, 'sabado': 6, 'sáb': 6, 'sab': 6, 'sat': 6,
+          };
+          return map[lower];
+        }
+        return undefined;
+      }).filter(v => v !== undefined);
+      return normalized.includes(todayIndex);
+    });
+  }, [habits, todayIndex]);
+
   const value = {
     habits,
+    todaysHabits,
     loading,
     error,
     setError,
     // Helper functions
     getHabitById: (id) => habits.find(habit => habit.id === id),
     getHabitsByCategory: (category) => habits.filter(habit => habit.category === category),
-    getCompletedHabits: () => habits.filter(habit => habit.status === 'completed'),
-    getPendingHabits: () => habits.filter(habit => habit.status === 'pending'),
+    getCompletedHabits: () => todaysHabits.filter(habit => habit.status === 'completed'),
+    getPendingHabits: () => todaysHabits.filter(habit => habit.status === 'pending'),
     getTotalStreak: () => habits.reduce((sum, habit) => sum + (habit.streak || 0), 0),
     getBestStreak: () => habits.length > 0 ? Math.max(...habits.map(h => h.streak || 0)) : 0,
     getProgressPercentage: () => {
-      if (habits.length === 0) return 0;
-      const completed = habits.filter(h => h.status === 'completed').length;
-      return Math.round((completed / habits.length) * 100) || 0;
+      if (todaysHabits.length === 0) return 0;
+      const completed = todaysHabits.filter(h => h.status === 'completed').length;
+      return Math.round((completed / todaysHabits.length) * 100) || 0;
     },
     // Gamification functions
     completeHabit: async (habitId) => {
@@ -143,7 +171,7 @@ export const HabitsProvider = ({ children }) => {
         const progress = await GamificationService.getUserProgress(user.uid);
         const userStats = {
           totalHabits: habits.length,
-          completedHabits: habits.filter(h => h.status === 'completed').length,
+          completedHabits: todaysHabits.filter(h => h.status === 'completed').length,
           bestStreak: Math.max(...habits.map(h => h.streak || 0)),
           totalCompletions: habits.reduce((sum, h) => sum + (h.totalCompletions || 0), 0),
           categoriesCompleted: new Set(habits.map(h => h.category)).size,
