@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
 import Colors from '../constants/Colors';
-import GlobalStyles from '../constants/Styles';
+import { useThemedStyles } from '../contexts/ThemeContext';
 import { useHabits } from '../contexts/HabitsContext';
 import { updateHabitReminder } from '../config/firebase';
 
@@ -30,6 +30,7 @@ function timeToHoursMinutes(timeStr) {
 }
 
 export default function RemindersScreen() {
+  const GlobalStyles = useThemedStyles();
   const { habits } = useHabits();
   const [isSupported, setIsSupported] = useState(true);
 

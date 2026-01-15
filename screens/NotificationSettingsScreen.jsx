@@ -10,10 +10,79 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
-import GlobalStyles from '../constants/Styles';
+import { useThemedStyles, useTheme } from '../contexts/ThemeContext';
 import NotificationService from '../services/NotificationService';
 
+const styles = StyleSheet.create({
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  headerDescription: {
+    fontSize: 16,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 16,
+  },
+  settingItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.cardBorder,
+  },
+  settingInfo: {
+    flex: 1,
+    marginRight: 16,
+  },
+  settingTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 4,
+  },
+  settingDescription: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+  },
+  actionButton: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  actionButtonText: {
+    color: Colors.textInverse,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  infoTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 12,
+  },
+  infoText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+  },
+});
+
 export default function NotificationSettingsScreen({ navigation }) {
+  const GlobalStyles = useThemedStyles();
+  const { colors } = useTheme();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [habitReminders, setHabitReminders] = useState(true);
   const [streakReminders, setStreakReminders] = useState(true);
@@ -170,17 +239,17 @@ export default function NotificationSettingsScreen({ navigation }) {
   };
 
   const renderSettingItem = (title, description, value, onToggle, disabled = false) => (
-    <View style={styles.settingItem}>
+    <View style={[styles.settingItem, { borderBottomColor: colors.cardBorder }]}>
       <View style={styles.settingInfo}>
-        <Text style={styles.settingTitle}>{title}</Text>
-        <Text style={styles.settingDescription}>{description}</Text>
+        <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>{title}</Text>
+        <Text style={[styles.settingDescription, { color: colors.textSecondary }]}>{description}</Text>
       </View>
       <Switch
         value={value}
         onValueChange={onToggle}
         disabled={disabled || !notificationsEnabled}
-        trackColor={{ false: Colors.backgroundTertiary, true: Colors.primary }}
-        thumbColor={value ? Colors.textInverse : Colors.textSecondary}
+        trackColor={{ false: colors.backgroundTertiary, true: colors.primary }}
+        thumbColor={value ? colors.textInverse : colors.textSecondary}
       />
     </View>
   );
@@ -190,33 +259,33 @@ export default function NotificationSettingsScreen({ navigation }) {
       <ScrollView style={GlobalStyles.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={[GlobalStyles.card, { marginBottom: 16 }]}>
-          <Text style={styles.headerTitle}>Configuración de Notificaciones</Text>
-          <Text style={styles.headerDescription}>
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Configuración de Notificaciones</Text>
+          <Text style={[styles.headerDescription, { color: colors.textSecondary }]}>
             Personaliza cómo y cuándo recibir notificaciones para mantener tus hábitos activos
           </Text>
         </View>
 
         {/* Permisos principales */}
         <View style={[GlobalStyles.card, { marginBottom: 16 }]}>
-          <View style={styles.settingItem}>
+          <View style={[styles.settingItem, { borderBottomColor: colors.cardBorder }]}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingTitle}>Notificaciones</Text>
-              <Text style={styles.settingDescription}>
+              <Text style={[styles.settingTitle, { color: colors.textPrimary }]}>Notificaciones</Text>
+              <Text style={[styles.settingDescription, { color: colors.textSecondary }]}>
                 Habilitar todas las notificaciones de la aplicación
               </Text>
             </View>
             <Switch
               value={notificationsEnabled}
               onValueChange={handlePermissionToggle}
-              trackColor={{ false: Colors.backgroundTertiary, true: Colors.primary }}
-              thumbColor={notificationsEnabled ? Colors.textInverse : Colors.textSecondary}
+              trackColor={{ false: colors.backgroundTertiary, true: colors.primary }}
+              thumbColor={notificationsEnabled ? colors.textInverse : colors.textSecondary}
             />
           </View>
         </View>
 
         {/* Configuraciones específicas */}
         <View style={[GlobalStyles.card, { marginBottom: 16 }]}>
-          <Text style={styles.sectionTitle}>Recordatorios de Hábitos</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Recordatorios de Hábitos</Text>
           
           {renderSettingItem(
             'Recordatorios Diarios',
@@ -242,7 +311,7 @@ export default function NotificationSettingsScreen({ navigation }) {
 
         {/* Reportes y resúmenes */}
         <View style={[GlobalStyles.card, { marginBottom: 16 }]}>
-          <Text style={styles.sectionTitle}>Reportes y Resúmenes</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Reportes y Resúmenes</Text>
           
           {renderSettingItem(
             'Resumen Diario',
@@ -264,18 +333,18 @@ export default function NotificationSettingsScreen({ navigation }) {
           <TouchableOpacity
             style={[
               styles.actionButton,
-              { backgroundColor: Colors.primary, opacity: notificationsEnabled ? 1 : 0.5 }
+              { backgroundColor: colors.primary, opacity: notificationsEnabled ? 1 : 0.5 }
             ]}
             onPress={testNotification}
             disabled={!notificationsEnabled}
           >
-            <Text style={styles.actionButtonText}>🔔 Probar Notificación</Text>
+            <Text style={[styles.actionButtonText, { color: colors.textInverse }]}>🔔 Probar Notificación</Text>
           </TouchableOpacity>
           
           <TouchableOpacity
             style={[
               styles.actionButton,
-              { backgroundColor: Colors.secondary, marginTop: 12 }
+              { backgroundColor: colors.secondary, marginTop: 12 }
             ]}
             onPress={() => {
               Alert.alert(
@@ -284,14 +353,14 @@ export default function NotificationSettingsScreen({ navigation }) {
               );
             }}
           >
-            <Text style={styles.actionButtonText}>ℹ️ Cómo Funcionan</Text>
+            <Text style={[styles.actionButtonText, { color: colors.textInverse }]}>ℹ️ Cómo Funcionan</Text>
           </TouchableOpacity>
         </View>
 
         {/* Información adicional */}
         <View style={[GlobalStyles.card, { marginBottom: 20 }]}>
-          <Text style={styles.infoTitle}>💡 Consejos</Text>
-          <Text style={styles.infoText}>
+          <Text style={[styles.infoTitle, { color: colors.textPrimary }]}>💡 Consejos</Text>
+          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
             • Las notificaciones funcionan mejor cuando la app está cerrada{'\n'}
             • Asegúrate de que tu dispositivo no esté en modo "No molestar"{'\n'}
             • Las notificaciones se adaptan a tu zona horaria{'\n'}
@@ -302,70 +371,3 @@ export default function NotificationSettingsScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  headerDescription: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 16,
-  },
-  settingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.cardBorder,
-  },
-  settingInfo: {
-    flex: 1,
-    marginRight: 16,
-  },
-  settingTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 4,
-  },
-  settingDescription: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    lineHeight: 20,
-  },
-  actionButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  actionButtonText: {
-    color: Colors.textInverse,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  infoTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 12,
-  },
-  infoText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    lineHeight: 20,
-  },
-});

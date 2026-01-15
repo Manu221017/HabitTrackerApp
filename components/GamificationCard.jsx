@@ -7,10 +7,12 @@ import {
   Animated,
 } from 'react-native';
 import Colors from '../constants/Colors';
-import GlobalStyles from '../constants/Styles';
+import { useTheme } from '../contexts/ThemeContext';
 import { useHabits } from '../contexts/HabitsContext';
 
 export default function GamificationCard({ navigation }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const { getGamificationStats } = useHabits();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -54,12 +56,12 @@ export default function GamificationCard({ navigation }) {
   if (loading || !stats) {
     return (
       <TouchableOpacity
-        style={styles.card}
+        style={createStyles(colors).card}
         onPress={handlePress}
         activeOpacity={0.8}
       >
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Cargando...</Text>
+        <View style={createStyles(colors).loadingContainer}>
+          <Text style={createStyles(colors).loadingText}>Cargando...</Text>
         </View>
       </TouchableOpacity>
     );
@@ -125,18 +127,18 @@ export default function GamificationCard({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     marginHorizontal: 16,
     marginBottom: 16,
   },
   card: {
-    backgroundColor: Colors.backgroundSecondary,
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 16,
     padding: 20,
     borderWidth: 2,
-    borderColor: Colors.primary + '20',
-    shadowColor: Colors.primary,
+    borderColor: colors.primary + '20',
+    shadowColor: colors.primary,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -151,7 +153,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   header: {
     alignItems: 'center',
@@ -160,12 +162,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.primary,
+    color: colors.primary,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   mainInfo: {
@@ -179,13 +181,13 @@ const styles = StyleSheet.create({
   },
   levelLabel: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   levelValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: Colors.primary,
+    color: colors.primary,
   },
   pointsContainer: {
     alignItems: 'center',
@@ -193,13 +195,13 @@ const styles = StyleSheet.create({
   },
   pointsLabel: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   pointsValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: Colors.success,
+    color: colors.success,
   },
   rankContainer: {
     alignItems: 'center',
@@ -207,13 +209,13 @@ const styles = StyleSheet.create({
   },
   rankLabel: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   rankValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     textAlign: 'center',
   },
   progressSection: {
@@ -221,25 +223,25 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 8,
     textAlign: 'center',
   },
   progressBar: {
     height: 8,
-    backgroundColor: Colors.backgroundTertiary,
+    backgroundColor: colors.backgroundTertiary,
     borderRadius: 4,
     overflow: 'hidden',
     marginBottom: 8,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: 4,
   },
   progressText: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   buttonContainer: {
@@ -247,7 +249,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 14,
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '600',
   },
 });

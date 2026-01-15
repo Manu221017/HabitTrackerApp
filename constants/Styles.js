@@ -1,312 +1,172 @@
 // Styles.js - Reusable Styles and Theme Configuration
 import { StyleSheet, Dimensions } from 'react-native';
-import Colors from './Colors';
+import { LightColors } from './Colors'; // fallback para export por defecto
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-export const GlobalStyles = StyleSheet.create({
-  // Container Styles
+export const createGlobalStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
-  
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
-  
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     paddingHorizontal: 16,
   },
-  
-  // Card Styles
+  // Cards
   card: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: 16,
     marginVertical: 6,
     marginHorizontal: 12,
-    shadowColor: Colors.cardShadow,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowColor: colors.cardShadow,
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 2,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
   },
-  
   cardSmall: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     borderRadius: 10,
     padding: 12,
     marginVertical: 4,
     marginHorizontal: 8,
-    shadowColor: Colors.cardShadow,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowColor: colors.cardShadow,
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
     elevation: 1,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
   },
-  
-  // Text Styles - Adjusted for better fit
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.textPrimary,
-    marginBottom: 6,
-  },
-  
-  subtitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 4,
-  },
-  
-  heading: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 3,
-  },
-  
-  bodyText: {
-    fontSize: 14,
-    color: Colors.textPrimary,
-    lineHeight: 20,
-  },
-  
-  caption: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    lineHeight: 18,
-  },
-  
-  smallText: {
-    fontSize: 11,
-    color: Colors.textTertiary,
-  },
-  
-  // Button Styles
+  // Text
+  title: { fontSize: 24, fontWeight: 'bold', color: colors.textPrimary, marginBottom: 6 },
+  subtitle: { fontSize: 18, fontWeight: '600', color: colors.textPrimary, marginBottom: 4 },
+  heading: { fontSize: 16, fontWeight: '600', color: colors.textPrimary, marginBottom: 3 },
+  bodyText: { fontSize: 14, color: colors.textPrimary, lineHeight: 20 },
+  caption: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+  smallText: { fontSize: 11, color: colors.textTertiary },
+  // Buttons
   buttonPrimary: {
-    backgroundColor: Colors.buttonPrimary,
+    backgroundColor: colors.buttonPrimary,
     borderRadius: 10,
     paddingVertical: 14,
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 3,
   },
-  
   buttonSecondary: {
-    backgroundColor: Colors.buttonSecondary,
+    backgroundColor: colors.buttonSecondary,
     borderRadius: 10,
     paddingVertical: 14,
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
   },
-  
   buttonSmall: {
-    backgroundColor: Colors.buttonPrimary,
+    backgroundColor: colors.buttonPrimary,
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  
-  buttonText: {
-    color: Colors.buttonText,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  
-  buttonTextSecondary: {
-    color: Colors.buttonTextSecondary,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  
-  // Input Styles
+  buttonText: { color: colors.buttonText, fontSize: 15, fontWeight: '600' },
+  buttonTextSecondary: { color: colors.buttonTextSecondary, fontSize: 15, fontWeight: '600' },
+  // Inputs
   input: {
-    backgroundColor: Colors.backgroundSecondary,
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 10,
     paddingVertical: 14,
     paddingHorizontal: 14,
     fontSize: 15,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
     marginVertical: 6,
   },
-  
-  inputFocused: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.background,
-  },
-  
-  // Row and Column Layouts
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  
-  rowSpaceBetween: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  
-  column: {
-    flexDirection: 'column',
-  },
-  
-  // Spacing - Reduced for better fit
-  marginVertical: {
-    marginVertical: 12,
-  },
-  
-  marginHorizontal: {
-    marginHorizontal: 12,
-  },
-  
-  padding: {
-    padding: 12,
-  },
-  
-  paddingVertical: {
-    paddingVertical: 12,
-  },
-  
-  paddingHorizontal: {
-    paddingHorizontal: 12,
-  },
-  
-  // Habit-specific styles - Adjusted for better fit
+  inputFocused: { borderColor: colors.primary, backgroundColor: colors.background },
+  // Layout helpers
+  row: { flexDirection: 'row', alignItems: 'center' },
+  rowSpaceBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  column: { flexDirection: 'column' },
+  // Habits
   habitCard: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: 16,
     marginVertical: 6,
     marginHorizontal: 12,
-    shadowColor: Colors.cardShadow,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowColor: colors.cardShadow,
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 2,
     borderLeftWidth: 3,
   },
-  
-  habitCardCompleted: {
-    borderLeftColor: Colors.habitCompleted,
-  },
-  
-  habitCardPending: {
-    borderLeftColor: Colors.habitPending,
-  },
-  
-  habitCardMissed: {
-    borderLeftColor: Colors.habitMissed,
-  },
-  
-  // Progress and Stats - Adjusted sizes
-  progressContainer: {
-    backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 10,
-    height: 6,
-    overflow: 'hidden',
-  },
-  
-  progressBar: {
-    height: '100%',
-    borderRadius: 10,
-  },
-  
+  habitCardCompleted: { borderLeftColor: colors.habitCompleted },
+  habitCardPending: { borderLeftColor: colors.habitPending },
+  habitCardMissed: { borderLeftColor: colors.habitMissed },
+  // Progress
+  progressContainer: { backgroundColor: colors.backgroundSecondary, borderRadius: 10, height: 6, overflow: 'hidden' },
+  progressBar: { height: '100%', borderRadius: 10 },
+  // Stats
   statsCard: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Colors.cardShadow,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowColor: colors.cardShadow,
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 2,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
   },
-  
-  // Navigation styles
+  // Header
   headerStyle: {
-    backgroundColor: Colors.headerBackground,
+    backgroundColor: colors.headerBackground,
     elevation: 0,
     shadowOpacity: 0,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.cardBorder,
+    borderBottomColor: colors.cardBorder,
   },
-  
-  headerTitleStyle: {
-    color: Colors.headerText,
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  
+  headerTitleStyle: { color: colors.headerText, fontSize: 17, fontWeight: '600' },
+  // Modal
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center' },
   modalContent: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: 20,
     marginHorizontal: 20,
     alignItems: 'center',
-    shadowColor: Colors.cardShadow,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    shadowColor: colors.cardShadow,
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 5,
   },
-  
   modalButton: {
-    backgroundColor: Colors.buttonPrimary,
+    backgroundColor: colors.buttonPrimary,
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 20,
@@ -314,36 +174,15 @@ export const GlobalStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  
-  modalButtonText: {
-    color: Colors.buttonText,
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  modalButtonText: { color: colors.buttonText, fontSize: 16, fontWeight: '600' },
 });
 
-// Responsive design helpers
+// Compat: export por defecto con colores claros para no romper imports antiguos
+const GlobalStyles = createGlobalStyles(LightColors);
+export default GlobalStyles;
+
 export const isSmallDevice = width < 375;
 export const isMediumDevice = width >= 375 && width < 414;
 export const isLargeDevice = width >= 414;
-
-// Spacing scale - Adjusted for better fit
-export const spacing = {
-  xs: 3,
-  sm: 6,
-  md: 12,
-  lg: 18,
-  xl: 24,
-  xxl: 36,
-};
-
-// Border radius scale
-export const borderRadius = {
-  sm: 4,
-  md: 6,
-  lg: 10,
-  xl: 12,
-  xxl: 18,
-};
-
-export default GlobalStyles; 
+export const spacing = { xs: 3, sm: 6, md: 12, lg: 18, xl: 24, xxl: 36 };
+export const borderRadius = { sm: 4, md: 6, lg: 10, xl: 12, xxl: 18 };

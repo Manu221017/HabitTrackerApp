@@ -1,10 +1,9 @@
 // App.js
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useEffect } from 'react';
+import { DefaultTheme, DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useEffect } from 'react';
 import Toast from 'react-native-toast-message';
 
 // Import screens
@@ -22,6 +21,7 @@ import AdvancedStatisticsScreen from './screens/AdvancedStatisticsScreen';
 // Import contexts
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { HabitsProvider } from './contexts/HabitsContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import NotificationService from './services/NotificationService';
 
 // Import styles
@@ -32,6 +32,7 @@ const Stack = createStackNavigator();
 
 function NavigationContent() {
   const { user, loading } = useAuth();
+  const { colors } = useTheme();
 
   // Configurar notificaciones cuando el usuario esté autenticado
   useEffect(() => {
@@ -61,9 +62,9 @@ function NavigationContent() {
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: Colors.primary,
+          backgroundColor: colors.headerBackground,
         },
-        headerTintColor: Colors.textInverse,
+        headerTintColor: colors.headerText,
         headerTitleStyle: {
           fontWeight: '600',
         },
@@ -163,17 +164,35 @@ function NavigationContent() {
   );
 }
 
+function ThemedNavigationContainer({ children }) {
+  const { isDarkMode, colors } = useTheme();
+  const navTheme = {
+    ...(isDarkMode ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDarkMode ? DarkTheme.colors : DefaultTheme.colors),
+      background: colors.background,
+      card: colors.headerBackground,
+      text: colors.headerText,
+      border: colors.cardBorder,
+      primary: colors.primary,
+    },
+  };
+  return <NavigationContainer theme={navTheme}>{children}</NavigationContainer>;
+}
+
 export default function App() {
   return (
     <SafeAreaProvider>
+      <ThemeProvider>
       <AuthProvider>
         <HabitsProvider>
-          <NavigationContainer>
+          <ThemedNavigationContainer>
             <NavigationContent />
-          </NavigationContainer>
-          <Toast />
+          </ThemedNavigationContainer>
+            <Toast />
         </HabitsProvider>
       </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

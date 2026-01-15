@@ -19,6 +19,7 @@ import {
   query, 
   where, 
   getDocs, 
+  getDoc,
   orderBy,
   serverTimestamp,
   setDoc
@@ -195,18 +196,19 @@ export const updateHabitStatus = async (habitId, status, date = new Date()) => {
 
     const habitRef = doc(db, 'habits', habitId);
     
-    // Get current habit data
-    const habitDoc = await getDocs(query(
-      collection(db, 'habits'),
-      where('__name__', '==', habitId),
-      where('userId', '==', user.uid)
-    ));
+    // Get current habit data and verify ownership
+    const habitDocSnap = await getDoc(habitRef);
 
-    if (habitDoc.empty) {
+    if (!habitDocSnap.exists()) {
       return { success: false, error: 'Hábito no encontrado' };
     }
 
-    const habitData = habitDoc.docs[0].data();
+    const habitData = habitDocSnap.data();
+    
+    // Verify that the habit belongs to the current user
+    if (habitData.userId !== user.uid) {
+      return { success: false, error: 'No tienes permiso para modificar este hábito' };
+    }
     let newStreak = habitData.streak || 0;
     let totalCompletions = habitData.totalCompletions || 0;
 

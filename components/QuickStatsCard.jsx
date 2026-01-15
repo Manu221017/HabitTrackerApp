@@ -7,11 +7,13 @@ import {
   Animated,
 } from 'react-native';
 import Colors from '../constants/Colors';
-import GlobalStyles from '../constants/Styles';
+import { useTheme } from '../contexts/ThemeContext';
 import AdvancedStatsService from '../services/AdvancedStatsService';
 import { useHabits } from '../contexts/HabitsContext';
 
 export default function QuickStatsCard({ navigation }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const { habits } = useHabits();
   const [quickStats, setQuickStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -65,12 +67,12 @@ export default function QuickStatsCard({ navigation }) {
   if (loading || !quickStats) {
     return (
       <TouchableOpacity
-        style={styles.card}
+        style={createStyles(colors).card}
         onPress={handlePress}
         activeOpacity={0.8}
       >
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Cargando estadísticas...</Text>
+        <View style={createStyles(colors).loadingContainer}>
+          <Text style={createStyles(colors).loadingText}>Cargando estadísticas...</Text>
         </View>
       </TouchableOpacity>
     );
@@ -105,8 +107,8 @@ export default function QuickStatsCard({ navigation }) {
             <Text style={styles.statLabel}>Tendencia</Text>
             <Text style={[
               styles.statValue,
-              { color: trend.summary.trendDirection === 'increasing' ? Colors.success : 
-                       trend.summary.trendDirection === 'decreasing' ? Colors.error : Colors.textSecondary }
+              { color: trend.summary.trendDirection === 'increasing' ? colors.success : 
+                       trend.summary.trendDirection === 'decreasing' ? colors.error : colors.textSecondary }
             ]}>
               {trend.summary.trendDirection === 'increasing' ? '↗️' :
                trend.summary.trendDirection === 'decreasing' ? '↘️' : '→'}
@@ -161,18 +163,18 @@ export default function QuickStatsCard({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     marginHorizontal: 16,
     marginBottom: 16,
   },
   card: {
-    backgroundColor: Colors.backgroundSecondary,
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 16,
     padding: 20,
     borderWidth: 2,
-    borderColor: Colors.primary + '20',
-    shadowColor: Colors.primary,
+    borderColor: colors.primary + '20',
+    shadowColor: colors.primary,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -187,7 +189,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   header: {
     alignItems: 'center',
@@ -196,12 +198,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.primary,
+    color: colors.primary,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   mainStats: {
@@ -215,19 +217,19 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 4,
     textAlign: 'center',
   },
   statValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.primary,
+    color: colors.primary,
     marginBottom: 2,
   },
   statUnit: {
     fontSize: 10,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   progressSection: {
@@ -241,22 +243,22 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   progressValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primary,
+    color: colors.primary,
   },
   progressBar: {
     height: 8,
-    backgroundColor: Colors.backgroundTertiary,
+    backgroundColor: colors.backgroundTertiary,
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: 4,
   },
   insightsSection: {
@@ -265,17 +267,17 @@ const styles = StyleSheet.create({
   insightsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   insightItem: {
-    backgroundColor: Colors.backgroundTertiary,
+    backgroundColor: colors.backgroundTertiary,
     padding: 12,
     borderRadius: 8,
   },
   insightText: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -284,7 +286,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 14,
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '600',
   },
 });

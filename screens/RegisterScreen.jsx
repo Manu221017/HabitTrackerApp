@@ -11,11 +11,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
-import GlobalStyles from '../constants/Styles';
+import { useThemedStyles, useTheme } from '../contexts/ThemeContext';
 import { signUp } from '../config/firebase';
 import Toast from 'react-native-toast-message';
 
 export default function RegisterScreen({ navigation }) {
+  const GlobalStyles = useThemedStyles();
+  const { colors } = useTheme();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -93,7 +95,7 @@ export default function RegisterScreen({ navigation }) {
         >
           {/* Header Section */}
           <View style={[GlobalStyles.card, { marginBottom: 24, alignItems: 'center' }]}>
-            <Text style={[GlobalStyles.title, { color: Colors.primary, textAlign: 'center' }]}>
+            <Text style={[GlobalStyles.title, { color: colors.primary, textAlign: 'center' }]}>
               Crear Cuenta
             </Text>
             <Text style={[GlobalStyles.caption, { textAlign: 'center', marginTop: 6 }]}>
@@ -109,13 +111,13 @@ export default function RegisterScreen({ navigation }) {
 
             {/* Name Input */}
             <View style={{ marginBottom: 12 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
                 Nombre Completo
               </Text>
               <TextInput
                 style={GlobalStyles.input}
                 placeholder="Tu nombre completo"
-                placeholderTextColor={Colors.textTertiary}
+                placeholderTextColor={colors.textTertiary}
                 value={name}
                 onChangeText={setName}
                 autoCapitalize="words"
@@ -126,13 +128,13 @@ export default function RegisterScreen({ navigation }) {
 
             {/* Email Input */}
             <View style={{ marginBottom: 12 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
                 Correo Electrónico
               </Text>
               <TextInput
                 style={GlobalStyles.input}
                 placeholder="tu@email.com"
-                placeholderTextColor={Colors.textTertiary}
+                placeholderTextColor={colors.textTertiary}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -144,13 +146,13 @@ export default function RegisterScreen({ navigation }) {
 
             {/* Password Input */}
             <View style={{ marginBottom: 12 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
                 Contraseña
               </Text>
               <TextInput
                 style={GlobalStyles.input}
                 placeholder="••••••••"
-                placeholderTextColor={Colors.textTertiary}
+                placeholderTextColor={colors.textTertiary}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -161,13 +163,13 @@ export default function RegisterScreen({ navigation }) {
 
             {/* Confirm Password Input */}
             <View style={{ marginBottom: 20 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
                 Confirmar Contraseña
               </Text>
               <TextInput
                 style={GlobalStyles.input}
                 placeholder="••••••••"
-                placeholderTextColor={Colors.textTertiary}
+                placeholderTextColor={colors.textTertiary}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry
@@ -197,7 +199,7 @@ export default function RegisterScreen({ navigation }) {
                 ¿Ya tienes cuenta?{' '}
               </Text>
               <TouchableOpacity onPress={handleBackToLogin} disabled={isLoading}>
-                <Text style={[GlobalStyles.caption, { color: Colors.primary, fontWeight: '600' }]}>
+                <Text style={[GlobalStyles.caption, { color: colors.primary, fontWeight: '600' }]}>
                   Inicia sesión aquí
                 </Text>
               </TouchableOpacity>
@@ -215,7 +217,7 @@ export default function RegisterScreen({ navigation }) {
                   width: 6,
                   height: 6,
                   borderRadius: 3,
-                  backgroundColor: Colors.success,
+                  backgroundColor: colors.success,
                   marginRight: 10,
                   marginTop: 4
                 }} />
@@ -228,7 +230,7 @@ export default function RegisterScreen({ navigation }) {
                   width: 6,
                   height: 6,
                   borderRadius: 3,
-                  backgroundColor: Colors.primary,
+                  backgroundColor: colors.primary,
                   marginRight: 10,
                   marginTop: 4
                 }} />
@@ -241,7 +243,7 @@ export default function RegisterScreen({ navigation }) {
                   width: 6,
                   height: 6,
                   borderRadius: 3,
-                  backgroundColor: Colors.accent,
+                  backgroundColor: colors.accent,
                   marginRight: 10,
                   marginTop: 4
                 }} />

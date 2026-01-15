@@ -10,21 +10,370 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LineChart, BarChart, PieChart, ProgressChart } from 'react-native-chart-kit';
-import Colors from '../constants/Colors';
-import GlobalStyles from '../constants/Styles';
+import { useThemedStyles, useTheme } from '../contexts/ThemeContext';
 import AdvancedStatsService from '../services/AdvancedStatsService';
 import { useHabits } from '../contexts/HabitsContext';
 import { useAuth } from '../contexts/AuthContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 
+const createStyles = (colors) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 18,
+    color: colors.textSecondary,
+  },
+  header: {
+    padding: 20,
+    alignItems: 'center',
+    backgroundColor: colors.primary + '08',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.primary,
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  timeRangeContainer: {
+    padding: 16,
+    backgroundcolor: colors.backgroundSecondary,
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 12,
+  },
+  timeRangeButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  timeRangeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    backgroundColor: colors.background,
+  },
+  timeRangeButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  timeRangeButtonText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  timeRangeButtonTextActive: {
+    color: colors.textInverse,
+  },
+  tabsContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.backgroundSecondary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 8,
+    marginHorizontal: 4,
+  },
+  activeTab: {
+    backgroundColor: colors.primary + '20',
+  },
+  tabText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  activeTabText: {
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  tabContentContainer: {
+    flex: 1,
+  },
+  tabContent: {
+    padding: 16,
+  },
+  summarySection: {
+    marginBottom: 24,
+  },
+  summaryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  summaryCard: {
+    backgroundColor: colors.backgroundSecondary,
+    padding: 16,
+    borderRadius: 12,
+    width: '48%',
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+  },
+  summaryValue: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  summaryLabel: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  productivitySection: {
+    marginBottom: 24,
+  },
+  productivityCard: {
+    backgroundColor: colors.backgroundSecondary,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+  },
+  productivityHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  productivityTitle: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    marginBottom: 8,
+  },
+  productivityScore: {
+    fontSize: 48,
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  productivityFactors: {
+    borderTopWidth: 1,
+    borderTopColor: colors.cardBorder,
+    paddingTop: 16,
+  },
+  factorTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 12,
+  },
+  factorItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  factorLabel: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  factorValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  chartSection: {
+    marginBottom: 24,
+  },
+  chartContainer: {
+    backgroundColor: colors.backgroundSecondary,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+  },
+  chart: {
+    borderRadius: 16,
+  },
+  trendSummary: {
+    backgroundColor: colors.backgroundSecondary,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+  },
+  trendLabel: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 4,
+  },
+  trendValue: {
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  categoriesSection: {
+    marginBottom: 24,
+  },
+  categoryCard: {
+    backgroundColor: colors.backgroundSecondary,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+  },
+  categoryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  categoryName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  categoryStrength: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  categoryStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  categoryStat: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  categoryStatLabel: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  categoryStatValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  timeDistribution: {
+    borderTopWidth: 1,
+    borderTopColor: colors.cardBorder,
+    paddingTop: 12,
+  },
+  timeDistributionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 8,
+  },
+  timeSlots: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  timeSlot: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    width: '48%',
+    marginBottom: 4,
+  },
+  insightsSection: {
+    marginBottom: 24,
+  },
+  insightCard: {
+    backgroundColor: colors.backgroundSecondary,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  insightTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    flex: 1,
+  },
+  insightPriority: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  insightPriorityText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  insightMessage: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 20,
+  },
+  recommendationsSection: {
+    marginBottom: 24,
+  },
+  recommendationCard: {
+    backgroundColor: colors.backgroundSecondary,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+  },
+  recommendationHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  recommendationTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    flex: 1,
+  },
+  recommendationType: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  recommendationTypeText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  recommendationDescription: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 20,
+  },
+});
+
 export default function AdvancedStatisticsScreen({ navigation }) {
+  const GlobalStyles = useThemedStyles();
+  const { colors } = useTheme();
   const { user } = useAuth();
   const { habits } = useHabits();
   const [selectedTimeRange, setSelectedTimeRange] = useState(30);
   const [statsData, setStatsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const screenStyles = createStyles(colors);
 
   const timeRanges = [
     { label: '7 días', value: 7 },
@@ -50,21 +399,21 @@ export default function AdvancedStatisticsScreen({ navigation }) {
   };
 
   const renderTimeRangeSelector = () => (
-    <View style={styles.timeRangeContainer}>
-      <Text style={styles.sectionTitle}>Período de Análisis</Text>
-      <View style={styles.timeRangeButtons}>
+    <View style={screenStyles.timeRangeContainer}>
+      <Text style={screenStyles.sectionTitle}>Período de Análisis</Text>
+      <View style={screenStyles.timeRangeButtons}>
         {timeRanges.map((range) => (
           <TouchableOpacity
             key={range.value}
             style={[
-              styles.timeRangeButton,
-              selectedTimeRange === range.value && styles.timeRangeButtonActive
+              screenStyles.timeRangeButton,
+              selectedTimeRange === range.value && screenStyles.timeRangeButtonActive
             ]}
             onPress={() => setSelectedTimeRange(range.value)}
           >
             <Text style={[
-              styles.timeRangeButtonText,
-              selectedTimeRange === range.value && styles.timeRangeButtonTextActive
+              screenStyles.timeRangeButtonText,
+              selectedTimeRange === range.value && screenStyles.timeRangeButtonTextActive
             ]}>
               {range.label}
             </Text>
@@ -80,65 +429,65 @@ export default function AdvancedStatisticsScreen({ navigation }) {
     const { summary, trends, productivity } = statsData;
 
     return (
-      <View style={styles.tabContent}>
+      <View style={screenStyles.tabContent}>
         {/* Resumen General */}
-        <View style={styles.summarySection}>
-          <Text style={styles.sectionTitle}>📊 Resumen General</Text>
-          <View style={styles.summaryGrid}>
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryValue}>{summary.totalHabits}</Text>
-              <Text style={styles.summaryLabel}>Total Hábitos</Text>
+        <View style={screenStyles.summarySection}>
+          <Text style={screenStyles.sectionTitle}>📊 Resumen General</Text>
+          <View style={screenStyles.summaryGrid}>
+            <View style={screenStyles.summaryCard}>
+              <Text style={screenStyles.summaryValue}>{summary.totalHabits}</Text>
+              <Text style={screenStyles.summaryLabel}>Total Hábitos</Text>
             </View>
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryValue}>{summary.activeHabits}</Text>
-              <Text style={styles.summaryLabel}>Activos</Text>
+            <View style={screenStyles.summaryCard}>
+              <Text style={screenStyles.summaryValue}>{summary.activeHabits}</Text>
+              <Text style={screenStyles.summaryLabel}>Activos</Text>
             </View>
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryValue}>{summary && summary.completionRate !== undefined ? Math.round(summary.completionRate * 100) / 100 : 'Cargando...'}</Text>
-              <Text style={styles.summaryLabel}>Tasa Completación</Text>
+            <View style={screenStyles.summaryCard}>
+              <Text style={screenStyles.summaryValue}>{summary && summary.completionRate !== undefined ? Math.round(summary.completionRate * 100) / 100 : 'Cargando...'}</Text>
+              <Text style={screenStyles.summaryLabel}>Tasa Completación</Text>
             </View>
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryValue}>{summary.bestStreak}</Text>
-              <Text style={styles.summaryLabel}>Mejor Racha</Text>
+            <View style={screenStyles.summaryCard}>
+              <Text style={screenStyles.summaryValue}>{summary.bestStreak}</Text>
+              <Text style={screenStyles.summaryLabel}>Mejor Racha</Text>
             </View>
           </View>
         </View>
 
         {/* Índice de Productividad */}
-        <View style={styles.productivitySection}>
-          <Text style={styles.sectionTitle}>🚀 Índice de Productividad</Text>
-          <View style={styles.productivityCard}>
-            <View style={styles.productivityHeader}>
-              <Text style={styles.productivityTitle}>Tu Puntuación</Text>
-              <Text style={styles.productivityScore}>{productivity.index}</Text>
+        <View style={screenStyles.productivitySection}>
+          <Text style={screenStyles.sectionTitle}>🚀 Índice de Productividad</Text>
+          <View style={screenStyles.productivityCard}>
+            <View style={screenStyles.productivityHeader}>
+              <Text style={screenStyles.productivityTitle}>Tu Puntuación</Text>
+              <Text style={screenStyles.productivityScore}>{productivity.index}</Text>
             </View>
             
-            <View style={styles.productivityFactors}>
-              <Text style={styles.factorTitle}>Factores:</Text>
-              <View style={styles.factorItem}>
-                <Text style={styles.factorLabel}>Tasa de Completación</Text>
-                <Text style={styles.factorValue}>{productivity && productivity.factors && productivity.factors.completionRate !== undefined ? productivity.factors.completionRate + '%' : 'Cargando...'}</Text>
+            <View style={screenStyles.productivityFactors}>
+              <Text style={screenStyles.factorTitle}>Factores:</Text>
+              <View style={screenStyles.factorItem}>
+                <Text style={screenStyles.factorLabel}>Tasa de Completación</Text>
+                <Text style={screenStyles.factorValue}>{productivity && productivity.factors && productivity.factors.completionRate !== undefined ? productivity.factors.completionRate + '%' : 'Cargando...'}</Text>
               </View>
-              <View style={styles.factorItem}>
-                <Text style={styles.factorLabel}>Bonus por Rachas</Text>
-                <Text style={styles.factorValue}>{productivity && productivity.factors && productivity.factors.streakBonus !== undefined ? '+' + productivity.factors.streakBonus : 'Cargando...'}</Text>
+              <View style={screenStyles.factorItem}>
+                <Text style={screenStyles.factorLabel}>Bonus por Rachas</Text>
+                <Text style={screenStyles.factorValue}>{productivity && productivity.factors && productivity.factors.streakBonus !== undefined ? '+' + productivity.factors.streakBonus : 'Cargando...'}</Text>
               </View>
-              <View style={styles.factorItem}>
-                <Text style={styles.factorLabel}>Bonus por Consistencia</Text>
-                <Text style={styles.factorValue}>{productivity && productivity.factors && productivity.factors.consistencyBonus !== undefined ? '+' + productivity.factors.consistencyBonus : 'Cargando...'}</Text>
+              <View style={screenStyles.factorItem}>
+                <Text style={screenStyles.factorLabel}>Bonus por Consistencia</Text>
+                <Text style={screenStyles.factorValue}>{productivity && productivity.factors && productivity.factors.consistencyBonus !== undefined ? '+' + productivity.factors.consistencyBonus : 'Cargando...'}</Text>
               </View>
-              <View style={styles.factorItem}>
-                <Text style={styles.factorLabel}>Bonus por Variedad</Text>
-                <Text style={styles.factorValue}>{productivity && productivity.factors && productivity.factors.varietyBonus !== undefined ? '+' + productivity.factors.varietyBonus : 'Cargando...'}</Text>
+              <View style={screenStyles.factorItem}>
+                <Text style={screenStyles.factorLabel}>Bonus por Variedad</Text>
+                <Text style={screenStyles.factorValue}>{productivity && productivity.factors && productivity.factors.varietyBonus !== undefined ? '+' + productivity.factors.varietyBonus : 'Cargando...'}</Text>
               </View>
             </View>
           </View>
         </View>
 
         {/* Gráfico de Tendencia */}
-        <View style={styles.chartSection}>
-          <Text style={styles.sectionTitle}>📈 Tendencia de Completación</Text>
-          <View style={styles.chartContainer}>
+        <View style={screenStyles.chartSection}>
+          <Text style={screenStyles.sectionTitle}>📈 Tendencia de Completación</Text>
+          <View style={screenStyles.chartContainer}>
             <LineChart
               data={{
                 labels: trends.trendData.slice(-7).map(d => d.date.slice(5)), // Solo últimos 7 días
@@ -149,39 +498,39 @@ export default function AdvancedStatisticsScreen({ navigation }) {
               width={screenWidth - 32}
               height={220}
               chartConfig={{
-                backgroundColor: Colors.backgroundSecondary,
-                backgroundGradientFrom: Colors.backgroundSecondary,
-                backgroundGradientTo: Colors.backgroundSecondary,
+                backgroundColor: colors.backgroundSecondary,
+                backgroundGradientFrom: colors.backgroundSecondary,
+                backgroundGradientTo: colors.backgroundSecondary,
                 decimalPlaces: 0,
-                color: (opacity = 1) => Colors.primary + Math.round(opacity * 255).toString(16).padStart(2, '0'),
-                labelColor: (opacity = 1) => Colors.textSecondary + Math.round(opacity * 255).toString(16).padStart(2, '0'),
+                color: (opacity = 1) => colors.primary + Math.round(opacity * 255).toString(16).padStart(2, '0'),
+                labelColor: (opacity = 1) => colors.textSecondary + Math.round(opacity * 255).toString(16).padStart(2, '0'),
                 style: {
                   borderRadius: 16
                 },
                 propsForDots: {
                   r: "6",
                   strokeWidth: "2",
-                  stroke: Colors.primary
+                  stroke: colors.primary
                 }
               }}
               bezier
-              style={styles.chart}
+              style={screenStyles.chart}
             />
           </View>
           
-          <View style={styles.trendSummary}>
-            <Text style={styles.trendLabel}>
+          <View style={screenStyles.trendSummary}>
+            <Text style={screenStyles.trendLabel}>
               Tendencia: <Text style={[
-                styles.trendValue,
-                { color: trends.summary.trendDirection === 'increasing' ? Colors.success : 
-                         trends.summary.trendDirection === 'decreasing' ? Colors.error : Colors.textSecondary }
+                screenStyles.trendValue,
+                { color: trends.summary.trendDirection === 'increasing' ? colors.success : 
+                         trends.summary.trendDirection === 'decreasing' ? colors.error : colors.textSecondary }
               ]}>
                 {trends.summary.trendDirection === 'increasing' ? '↗️ Aumentando' :
                  trends.summary.trendDirection === 'decreasing' ? '↘️ Disminuyendo' : '→ Estable'}
               </Text>
             </Text>
-            <Text style={styles.trendLabel}>
-              Consistencia: <Text style={styles.trendValue}>{trends.summary.consistency}</Text>
+            <Text style={screenStyles.trendLabel}>
+              Consistencia: <Text style={screenStyles.trendValue}>{trends.summary.consistency}</Text>
             </Text>
           </View>
         </View>
@@ -196,11 +545,11 @@ export default function AdvancedStatisticsScreen({ navigation }) {
     const categoryEntries = Object.entries(categories);
 
     return (
-      <View style={styles.tabContent}>
+      <View style={screenStyles.tabContent}>
         {/* Gráfico de Categorías */}
-        <View style={styles.chartSection}>
-          <Text style={styles.sectionTitle}>🏷️ Rendimiento por Categoría</Text>
-          <View style={styles.chartContainer}>
+        <View style={screenStyles.chartSection}>
+          <Text style={screenStyles.sectionTitle}>🏷️ Rendimiento por Categoría</Text>
+          <View style={screenStyles.chartContainer}>
             <BarChart
               data={{
                 labels: categoryEntries.map(([cat]) => cat.slice(0, 6)),
@@ -211,55 +560,55 @@ export default function AdvancedStatisticsScreen({ navigation }) {
               width={screenWidth - 32}
               height={220}
               chartConfig={{
-                backgroundColor: Colors.backgroundSecondary,
-                backgroundGradientFrom: Colors.backgroundSecondary,
-                backgroundGradientTo: Colors.backgroundSecondary,
+                backgroundColor: colors.backgroundSecondary,
+                backgroundGradientFrom: colors.backgroundSecondary,
+                backgroundGradientTo: colors.backgroundSecondary,
                 decimalPlaces: 0,
-                color: (opacity = 1) => Colors.primary + Math.round(opacity * 255).toString(16).padStart(2, '0'),
-                labelColor: (opacity = 1) => Colors.textSecondary + Math.round(opacity * 255).toString(16).padStart(2, '0'),
+                color: (opacity = 1) => colors.primary + Math.round(opacity * 255).toString(16).padStart(2, '0'),
+                labelColor: (opacity = 1) => colors.textSecondary + Math.round(opacity * 255).toString(16).padStart(2, '0'),
                 style: {
                   borderRadius: 16
                 }
               }}
-              style={styles.chart}
+              style={screenStyles.chart}
               fromZero
             />
           </View>
         </View>
 
         {/* Lista de Categorías */}
-        <View style={styles.categoriesSection}>
-          <Text style={styles.sectionTitle}>📋 Detalle por Categoría</Text>
+        <View style={screenStyles.categoriesSection}>
+          <Text style={screenStyles.sectionTitle}>📋 Detalle por Categoría</Text>
           {categoryEntries.map(([category, data]) => (
-            <View key={category} style={styles.categoryCard}>
-              <View style={styles.categoryHeader}>
-                <Text style={styles.categoryName}>{category}</Text>
-                <Text style={styles.categoryStrength}>{data.strength}%</Text>
+            <View key={category} style={screenStyles.categoryCard}>
+              <View style={screenStyles.categoryHeader}>
+                <Text style={screenStyles.categoryName}>{category}</Text>
+                <Text style={screenStyles.categoryStrength}>{data.strength}%</Text>
               </View>
               
-              <View style={styles.categoryStats}>
-                <View style={styles.categoryStat}>
-                  <Text style={styles.categoryStatLabel}>Completación</Text>
-                  <Text style={styles.categoryStatValue}>{data && data.completionRate !== undefined ? Math.round(data.completionRate) + '%' : 'Cargando...'}</Text>
+              <View style={screenStyles.categoryStats}>
+                <View style={screenStyles.categoryStat}>
+                  <Text style={screenStyles.categoryStatLabel}>Completación</Text>
+                  <Text style={screenStyles.categoryStatValue}>{data && data.completionRate !== undefined ? Math.round(data.completionRate) + '%' : 'Cargando...'}</Text>
                 </View>
-                <View style={styles.categoryStat}>
-                  <Text style={styles.categoryStatLabel}>Racha Promedio</Text>
-                  <Text style={styles.categoryStatValue}>{Math.round(data.averageStreak * 100) / 100}</Text>
+                <View style={screenStyles.categoryStat}>
+                  <Text style={screenStyles.categoryStatLabel}>Racha Promedio</Text>
+                  <Text style={screenStyles.categoryStatValue}>{Math.round(data.averageStreak * 100) / 100}</Text>
                 </View>
-                <View style={styles.categoryStat}>
-                  <Text style={styles.categoryStatLabel}>Total Completados</Text>
-                  <Text style={styles.categoryStatValue}>{data.totalCompletions}</Text>
+                <View style={screenStyles.categoryStat}>
+                  <Text style={screenStyles.categoryStatLabel}>Total Completados</Text>
+                  <Text style={screenStyles.categoryStatValue}>{data.totalCompletions}</Text>
                 </View>
               </View>
 
               {data.timeDistribution && (
-                <View style={styles.timeDistribution}>
-                  <Text style={styles.timeDistributionTitle}>Horarios Preferidos:</Text>
-                  <View style={styles.timeSlots}>
-                    <Text style={styles.timeSlot}>🌅 Mañana: {Math.round(data.timeDistribution.morning)}%</Text>
-                    <Text style={styles.timeSlot}>☀️ Tarde: {Math.round(data.timeDistribution.afternoon)}%</Text>
-                    <Text style={styles.timeSlot}>🌆 Noche: {Math.round(data.timeDistribution.evening)}%</Text>
-                    <Text style={styles.timeSlot}>🌙 Madrugada: {Math.round(data.timeDistribution.night)}%</Text>
+                <View style={screenStyles.timeDistribution}>
+                  <Text style={screenStyles.timeDistributionTitle}>Horarios Preferidos:</Text>
+                  <View style={screenStyles.timeSlots}>
+                    <Text style={screenStyles.timeSlot}>🌅 Mañana: {Math.round(data.timeDistribution.morning)}%</Text>
+                    <Text style={screenStyles.timeSlot}>☀️ Tarde: {Math.round(data.timeDistribution.afternoon)}%</Text>
+                    <Text style={screenStyles.timeSlot}>🌆 Noche: {Math.round(data.timeDistribution.evening)}%</Text>
+                    <Text style={screenStyles.timeSlot}>🌙 Madrugada: {Math.round(data.timeDistribution.night)}%</Text>
                   </View>
                 </View>
               )}
@@ -276,58 +625,58 @@ export default function AdvancedStatisticsScreen({ navigation }) {
     const { insights, recommendations } = statsData;
 
     return (
-      <View style={styles.tabContent}>
+      <View style={screenStyles.tabContent}>
         {/* Insights */}
-        <View style={styles.insightsSection}>
-          <Text style={styles.sectionTitle}>💡 Insights y Análisis</Text>
+        <View style={screenStyles.insightsSection}>
+          <Text style={screenStyles.sectionTitle}>💡 Insights y Análisis</Text>
           {insights.map((insight, index) => (
             <View key={index} style={[
-              styles.insightCard,
-              { borderLeftColor: insight.type === 'success' ? Colors.success : 
-                               insight.type === 'warning' ? Colors.error : Colors.primary }
+              screenStyles.insightCard,
+              { borderLeftColor: insight.type === 'success' ? colors.success : 
+                               insight.type === 'warning' ? colors.error : colors.primary }
             ]}>
-              <View style={styles.insightHeader}>
-                <Text style={styles.insightTitle}>{insight.title}</Text>
+              <View style={screenStyles.insightHeader}>
+                <Text style={screenStyles.insightTitle}>{insight.title}</Text>
                 <View style={[
-                  styles.insightPriority,
-                  { backgroundColor: insight.priority === 'high' ? Colors.error + '20' : 
-                                   insight.priority === 'medium' ? Colors.primary + '20' : Colors.success + '20' }
+                  screenStyles.insightPriority,
+                  { backgroundColor: insight.priority === 'high' ? colors.error + '20' : 
+                                   insight.priority === 'medium' ? colors.primary + '20' : colors.success + '20' }
                 ]}>
                   <Text style={[
-                    styles.insightPriorityText,
-                    { color: insight.priority === 'high' ? Colors.error : 
-                             insight.priority === 'medium' ? Colors.primary : Colors.success }
+                    screenStyles.insightPriorityText,
+                    { color: insight.priority === 'high' ? colors.error : 
+                             insight.priority === 'medium' ? colors.primary : colors.success }
                   ]}>
                     {insight.priority === 'high' ? 'Alta' : 
                      insight.priority === 'medium' ? 'Media' : 'Baja'}
                   </Text>
                 </View>
               </View>
-              <Text style={styles.insightMessage}>{insight.message}</Text>
+              <Text style={screenStyles.insightMessage}>{insight.message}</Text>
             </View>
           ))}
         </View>
 
         {/* Recomendaciones */}
-        <View style={styles.recommendationsSection}>
-          <Text style={styles.sectionTitle}>🎯 Recomendaciones</Text>
+        <View style={screenStyles.recommendationsSection}>
+          <Text style={screenStyles.sectionTitle}>🎯 Recomendaciones</Text>
           {recommendations.map((rec, index) => (
-            <View key={index} style={styles.recommendationCard}>
-              <View style={styles.recommendationHeader}>
-                <Text style={styles.recommendationTitle}>{rec.title}</Text>
+            <View key={index} style={screenStyles.recommendationCard}>
+              <View style={screenStyles.recommendationHeader}>
+                <Text style={screenStyles.recommendationTitle}>{rec.title}</Text>
                 <View style={[
-                  styles.recommendationType,
-                  { backgroundColor: rec.type === 'action' ? Colors.primary + '20' : Colors.success + '20' }
+                  screenStyles.recommendationType,
+                  { backgroundColor: rec.type === 'action' ? colors.primary + '20' : colors.success + '20' }
                 ]}>
                   <Text style={[
-                    styles.recommendationTypeText,
-                    { color: rec.type === 'action' ? Colors.primary : Colors.success }
+                    screenStyles.recommendationTypeText,
+                    { color: rec.type === 'action' ? colors.primary : colors.success }
                   ]}>
                     {rec.type === 'action' ? 'Acción' : 'Estrategia'}
                   </Text>
                 </View>
               </View>
-              <Text style={styles.recommendationDescription}>{rec.description}</Text>
+              <Text style={screenStyles.recommendationDescription}>{rec.description}</Text>
             </View>
           ))}
         </View>
@@ -336,30 +685,30 @@ export default function AdvancedStatisticsScreen({ navigation }) {
   };
 
   const renderTabs = () => (
-    <View style={styles.tabsContainer}>
+    <View style={screenStyles.tabsContainer}>
       <TouchableOpacity
-        style={[styles.tab, activeTab === 'overview' && styles.activeTab]}
+        style={[screenStyles.tab, activeTab === 'overview' && screenStyles.activeTab]}
         onPress={() => setActiveTab('overview')}
       >
-        <Text style={[styles.tabText, activeTab === 'overview' && styles.activeTabText]}>
+        <Text style={[screenStyles.tabText, activeTab === 'overview' && screenStyles.activeTabText]}>
           📊 Resumen
         </Text>
       </TouchableOpacity>
       
       <TouchableOpacity
-        style={[styles.tab, activeTab === 'categories' && styles.activeTab]}
+        style={[screenStyles.tab, activeTab === 'categories' && screenStyles.activeTab]}
         onPress={() => setActiveTab('categories')}
       >
-        <Text style={[styles.tabText, activeTab === 'categories' && styles.activeTabText]}>
+        <Text style={[screenStyles.tabText, activeTab === 'categories' && screenStyles.activeTabText]}>
           🏷️ Categorías
         </Text>
       </TouchableOpacity>
       
       <TouchableOpacity
-        style={[styles.tab, activeTab === 'insights' && styles.activeTab]}
+        style={[screenStyles.tab, activeTab === 'insights' && screenStyles.activeTab]}
         onPress={() => setActiveTab('insights')}
       >
-        <Text style={[styles.tabText, activeTab === 'insights' && styles.activeTabText]}>
+        <Text style={[screenStyles.tabText, activeTab === 'insights' && screenStyles.activeTabText]}>
           💡 Insights
         </Text>
       </TouchableOpacity>
@@ -369,8 +718,8 @@ export default function AdvancedStatisticsScreen({ navigation }) {
   if (loading) {
     return (
       <SafeAreaView style={GlobalStyles.safeArea}>
-        <View style={[GlobalStyles.container, styles.loadingContainer]}>
-          <Text style={styles.loadingText}>Analizando datos...</Text>
+        <View style={[GlobalStyles.container, screenStyles.loadingContainer]}>
+          <Text style={screenStyles.loadingText}>Analizando datos...</Text>
         </View>
       </SafeAreaView>
     );
@@ -378,11 +727,11 @@ export default function AdvancedStatisticsScreen({ navigation }) {
 
   return (
     <SafeAreaView style={GlobalStyles.safeArea}>
-      <View style={styles.container}>
+      <View style={screenStyles.container}>
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>📊 Estadísticas Avanzadas</Text>
-          <Text style={styles.headerSubtitle}>
+        <View style={screenStyles.header}>
+          <Text style={screenStyles.headerTitle}>📊 Estadísticas Avanzadas</Text>
+          <Text style={screenStyles.headerSubtitle}>
             Análisis profundo de tu progreso y patrones
           </Text>
         </View>
@@ -394,7 +743,7 @@ export default function AdvancedStatisticsScreen({ navigation }) {
         {renderTabs()}
 
         {/* Contenido de Tabs */}
-        <ScrollView style={styles.tabContentContainer} showsVerticalScrollIndicator={false}>
+        <ScrollView style={screenStyles.tabContentContainer} showsVerticalScrollIndicator={false}>
           {activeTab === 'overview' && renderOverviewTab()}
           {activeTab === 'categories' && renderCategoriesTab()}
           {activeTab === 'insights' && renderInsightsTab()}
@@ -403,350 +752,3 @@ export default function AdvancedStatisticsScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 18,
-    color: Colors.textSecondary,
-  },
-  header: {
-    padding: 20,
-    alignItems: 'center',
-    backgroundColor: Colors.primary + '08',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.primary,
-    marginBottom: 8,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-  timeRangeContainer: {
-    padding: 16,
-    backgroundColor: Colors.backgroundSecondary,
-    marginBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 12,
-  },
-  timeRangeButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  timeRangeButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-    backgroundColor: Colors.background,
-  },
-  timeRangeButtonActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  timeRangeButtonText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    fontWeight: '500',
-  },
-  timeRangeButtonTextActive: {
-    color: Colors.textInverse,
-  },
-  tabsContainer: {
-    flexDirection: 'row',
-    backgroundColor: Colors.backgroundSecondary,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderRadius: 8,
-    marginHorizontal: 4,
-  },
-  activeTab: {
-    backgroundColor: Colors.primary + '20',
-  },
-  tabText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    fontWeight: '500',
-  },
-  activeTabText: {
-    color: Colors.primary,
-    fontWeight: '600',
-  },
-  tabContentContainer: {
-    flex: 1,
-  },
-  tabContent: {
-    padding: 16,
-  },
-  summarySection: {
-    marginBottom: 24,
-  },
-  summaryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  summaryCard: {
-    backgroundColor: Colors.backgroundSecondary,
-    padding: 16,
-    borderRadius: 12,
-    width: '48%',
-    alignItems: 'center',
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  summaryValue: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.primary,
-    marginBottom: 4,
-  },
-  summaryLabel: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-  productivitySection: {
-    marginBottom: 24,
-  },
-  productivityCard: {
-    backgroundColor: Colors.backgroundSecondary,
-    padding: 20,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  productivityHeader: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  productivityTitle: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    marginBottom: 8,
-  },
-  productivityScore: {
-    fontSize: 48,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
-  productivityFactors: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.cardBorder,
-    paddingTop: 16,
-  },
-  factorTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 12,
-  },
-  factorItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  factorLabel: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
-  factorValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.primary,
-  },
-  chartSection: {
-    marginBottom: 24,
-  },
-  chartContainer: {
-    backgroundColor: Colors.backgroundSecondary,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-  },
-  chart: {
-    borderRadius: 16,
-  },
-  trendSummary: {
-    backgroundColor: Colors.backgroundSecondary,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  trendLabel: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginBottom: 4,
-  },
-  trendValue: {
-    fontWeight: '600',
-    color: Colors.textPrimary,
-  },
-  categoriesSection: {
-    marginBottom: 24,
-  },
-  categoryCard: {
-    backgroundColor: Colors.backgroundSecondary,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  categoryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  categoryName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-  },
-  categoryStrength: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
-  categoryStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  categoryStat: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  categoryStatLabel: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  categoryStatValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-  },
-  timeDistribution: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.cardBorder,
-    paddingTop: 12,
-  },
-  timeDistributionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 8,
-  },
-  timeSlots: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  timeSlot: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    width: '48%',
-    marginBottom: 4,
-  },
-  insightsSection: {
-    marginBottom: 24,
-  },
-  insightCard: {
-    backgroundColor: Colors.backgroundSecondary,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.primary,
-  },
-  insightHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  insightTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    flex: 1,
-  },
-  insightPriority: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  insightPriorityText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  insightMessage: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    lineHeight: 20,
-  },
-  recommendationsSection: {
-    marginBottom: 24,
-  },
-  recommendationCard: {
-    backgroundColor: Colors.backgroundSecondary,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  recommendationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  recommendationTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    flex: 1,
-  },
-  recommendationType: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  recommendationTypeText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  recommendationDescription: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    lineHeight: 20,
-  },
-});

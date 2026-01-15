@@ -2,11 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
-import GlobalStyles from '../constants/Styles';
+import { useThemedStyles, useTheme } from '../contexts/ThemeContext';
 import { useHabits } from '../contexts/HabitsContext';
 import { getLogsByMonth } from '../config/firebase';
 
 export default function StatisticsScreen() {
+  const GlobalStyles = useThemedStyles();
+  const { colors } = useTheme();
   const { habits, getBestStreak, getTotalStreak } = useHabits();
   const today = new Date();
   const [monthly, setMonthly] = useState({ completed: 0, missed: 0, pending: 0 });
@@ -38,11 +40,11 @@ export default function StatisticsScreen() {
           <Text style={GlobalStyles.title}>Resumen</Text>
           <View style={[GlobalStyles.rowSpaceBetween, { marginTop: 10 }]}>
             <View style={[GlobalStyles.statsCard, { flex: 1, marginRight: 6 }]}> 
-              <Text style={[GlobalStyles.heading, { color: Colors.success }]}>{getTotalStreak()}</Text>
+              <Text style={[GlobalStyles.heading, { color: colors.success }]}>{getTotalStreak()}</Text>
               <Text style={GlobalStyles.caption}>Racha total</Text>
             </View>
             <View style={[GlobalStyles.statsCard, { flex: 1, marginLeft: 6 }]}> 
-              <Text style={[GlobalStyles.heading, { color: Colors.primary }]}>{getBestStreak()}</Text>
+              <Text style={[GlobalStyles.heading, { color: colors.primary }]}>{getBestStreak()}</Text>
               <Text style={GlobalStyles.caption}>Mejor racha</Text>
             </View>
           </View>
@@ -51,22 +53,22 @@ export default function StatisticsScreen() {
         <View style={[GlobalStyles.card, { marginBottom: 12 }]}> 
           <Text style={GlobalStyles.subtitle}>Este mes</Text>
           <View style={{ marginTop: 10 }}>
-            <View style={{ height: 8, backgroundColor: Colors.backgroundSecondary, borderRadius: 8, overflow: 'hidden' }}>
-              <View style={{ width: `${completionRate}%`, height: '100%', backgroundColor: Colors.success }} />
+            <View style={{ height: 8, backgroundColor: colors.backgroundSecondary, borderRadius: 8, overflow: 'hidden' }}>
+              <View style={{ width: `${completionRate}%`, height: '100%', backgroundColor: colors.success }} />
             </View>
             <Text style={[GlobalStyles.caption, { marginTop: 6 }]}>{completionRate}% de cumplimiento</Text>
           </View>
           <View style={{ flexDirection: 'row', marginTop: 10 }}>
             <View style={[GlobalStyles.cardSmall, { flex: 1, marginRight: 6 }]}> 
-              <Text style={[GlobalStyles.heading, { color: Colors.success }]}>{monthly.completed}</Text>
+              <Text style={[GlobalStyles.heading, { color: colors.success }]}>{monthly.completed}</Text>
               <Text style={GlobalStyles.smallText}>Completados</Text>
             </View>
             <View style={[GlobalStyles.cardSmall, { flex: 1, marginHorizontal: 6 }]}> 
-              <Text style={[GlobalStyles.heading, { color: Colors.accent }]}>{monthly.pending}</Text>
+              <Text style={[GlobalStyles.heading, { color: colors.accent }]}>{monthly.pending}</Text>
               <Text style={GlobalStyles.smallText}>Pendientes</Text>
             </View>
             <View style={[GlobalStyles.cardSmall, { flex: 1, marginLeft: 6 }]}> 
-              <Text style={[GlobalStyles.heading, { color: Colors.error }]}>{monthly.missed}</Text>
+              <Text style={[GlobalStyles.heading, { color: colors.error }]}>{monthly.missed}</Text>
               <Text style={GlobalStyles.smallText}>Perdidos</Text>
             </View>
           </View>

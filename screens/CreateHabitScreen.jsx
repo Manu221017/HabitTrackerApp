@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import Colors from '../constants/Colors';
-import GlobalStyles from '../constants/Styles';
+import { useThemedStyles, useTheme } from '../contexts/ThemeContext';
 import { createHabit } from '../config/firebase';
 import Toast from 'react-native-toast-message';
 
@@ -31,6 +31,8 @@ const categories = [
 const dayLabels = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
 
 export default function CreateHabitScreen({ navigation }) {
+  const GlobalStyles = useThemedStyles();
+  const { colors } = useTheme();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -226,7 +228,7 @@ export default function CreateHabitScreen({ navigation }) {
         >
           {/* Header */}
           <View style={[GlobalStyles.card, { marginBottom: 20, alignItems: 'center' }]}>
-            <Text style={[GlobalStyles.title, { color: Colors.primary, textAlign: 'center' }]}>
+            <Text style={[GlobalStyles.title, { color: colors.primary, textAlign: 'center' }]}>
               Crear Nuevo Hábito
             </Text>
             <Text style={[GlobalStyles.caption, { textAlign: 'center', marginTop: 6 }]}>
@@ -238,13 +240,13 @@ export default function CreateHabitScreen({ navigation }) {
           <View style={[GlobalStyles.card, { marginBottom: 20 }]}>
             {/* Title Input */}
             <View style={{ marginBottom: 16 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
                 Título del Hábito *
               </Text>
               <TextInput
                 style={GlobalStyles.input}
                 placeholder="Ej: Ejercicio matutino"
-                placeholderTextColor={Colors.textTertiary}
+                placeholderTextColor={colors.textTertiary}
                 value={title}
                 onChangeText={setTitle}
                 maxLength={50}
@@ -254,13 +256,13 @@ export default function CreateHabitScreen({ navigation }) {
 
             {/* Description Input */}
             <View style={{ marginBottom: 16 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
                 Descripción *
               </Text>
               <TextInput
                 style={[GlobalStyles.input, { height: 80, textAlignVertical: 'top' }]}
                 placeholder="Describe tu hábito en detalle..."
-                placeholderTextColor={Colors.textTertiary}
+                placeholderTextColor={colors.textTertiary}
                 value={description}
                 onChangeText={setDescription}
                 multiline
@@ -272,7 +274,7 @@ export default function CreateHabitScreen({ navigation }) {
 
             {/* Category Selection */}
             <View style={{ marginBottom: 16 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
                 Categoría *
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -285,8 +287,8 @@ export default function CreateHabitScreen({ navigation }) {
                         paddingVertical: 8,
                         borderRadius: 20,
                         borderWidth: 2,
-                        borderColor: category === cat ? Colors.primary : Colors.cardBorder,
-                        backgroundColor: category === cat ? Colors.primary : Colors.backgroundSecondary,
+                        borderColor: category === cat ? colors.primary : colors.cardBorder,
+                        backgroundColor: category === cat ? colors.primary : colors.backgroundSecondary,
                         marginBottom: 8,
                       },
                       !isLoading && { opacity: 0.8 }
@@ -297,7 +299,7 @@ export default function CreateHabitScreen({ navigation }) {
                     <Text style={[
                       GlobalStyles.smallText,
                       { 
-                        color: category === cat ? Colors.textInverse : Colors.textSecondary,
+                        color: category === cat ? colors.textInverse : colors.textSecondary,
                         fontWeight: category === cat ? '600' : '400'
                       }
                     ]}>
@@ -310,7 +312,7 @@ export default function CreateHabitScreen({ navigation }) {
 
             {/* Time Selection */}
             <View style={{ marginBottom: 16 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
                 Días de la semana (si no eliges, será diario)
               </Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -323,16 +325,16 @@ export default function CreateHabitScreen({ navigation }) {
                       borderRadius: 18,
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: daysOfWeek.includes(idx) ? Colors.primary : Colors.backgroundSecondary,
+                      backgroundColor: daysOfWeek.includes(idx) ? colors.primary : colors.backgroundSecondary,
                       borderWidth: 1,
-                      borderColor: daysOfWeek.includes(idx) ? Colors.primary : Colors.cardBorder,
+                      borderColor: daysOfWeek.includes(idx) ? colors.primary : colors.cardBorder,
                     }}
                     onPress={() => {
                       setDaysOfWeek(prev => prev.includes(idx) ? prev.filter(d => d !== idx) : [...prev, idx]);
                     }}
                     disabled={isLoading}
                   >
-                    <Text style={{ color: daysOfWeek.includes(idx) ? Colors.textInverse : Colors.textSecondary, fontWeight: '600' }}>
+                    <Text style={{ color: daysOfWeek.includes(idx) ? colors.textInverse : colors.textSecondary, fontWeight: '600' }}>
                       {label}
                     </Text>
                   </TouchableOpacity>
@@ -342,7 +344,7 @@ export default function CreateHabitScreen({ navigation }) {
 
             {/* Time Selection */}
             <View style={{ marginBottom: 24 }}>
-              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: Colors.textPrimary }]}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
                 Hora del Día *
               </Text>
               <TouchableOpacity
@@ -350,7 +352,7 @@ export default function CreateHabitScreen({ navigation }) {
                   GlobalStyles.input,
                   { 
                     justifyContent: 'center',
-                    backgroundColor: time ? Colors.backgroundSecondary : Colors.inputBackground
+                    backgroundColor: time ? colors.backgroundSecondary : Colors.inputBackground
                   }
                 ]}
                 onPress={handleTimeSelection}
@@ -359,7 +361,7 @@ export default function CreateHabitScreen({ navigation }) {
                 <Text style={[
                   GlobalStyles.caption,
                   { 
-                    color: time ? Colors.textPrimary : Colors.textTertiary,
+                    color: time ? colors.textPrimary : colors.textTertiary,
                     textAlign: 'center'
                   }
                 ]}>
@@ -404,8 +406,8 @@ export default function CreateHabitScreen({ navigation }) {
                   GlobalStyles.buttonSecondary,
                   { 
                     marginBottom: 12,
-                    backgroundColor: Colors.accent + '20',
-                    borderColor: Colors.accent
+                  backgroundColor: colors.accent + '20',
+                  borderColor: colors.accent
                   }
                 ]}
                 onPress={() => {
@@ -421,7 +423,7 @@ export default function CreateHabitScreen({ navigation }) {
                 }}
                 disabled={isLoading}
               >
-                <Text style={[GlobalStyles.buttonTextSecondary, { color: Colors.accent }]}>
+              <Text style={[GlobalStyles.buttonTextSecondary, { color: colors.accent }]}>
                   🔄 Reset (Debug)
                 </Text>
               </TouchableOpacity>
@@ -492,14 +494,14 @@ export default function CreateHabitScreen({ navigation }) {
               alignItems: 'center',
               marginBottom: 20,
               borderBottomWidth: 1,
-              borderBottomColor: Colors.cardBorder,
+              borderBottomColor: colors.cardBorder,
               paddingBottom: 15
             }}>
-              <Text style={[GlobalStyles.subtitle, { color: Colors.textPrimary }]}>
+              <Text style={[GlobalStyles.subtitle, { color: colors.textPrimary }]}>
                 Seleccionar Hora
               </Text>
               <TouchableOpacity onPress={handleTimeCancel}>
-                <Text style={{ color: Colors.primary, fontSize: 16, fontWeight: '600' }}>
+                <Text style={{ color: colors.primary, fontSize: 16, fontWeight: '600' }}>
                   Cancelar
                 </Text>
               </TouchableOpacity>

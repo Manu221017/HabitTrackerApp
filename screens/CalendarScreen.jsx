@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
-import GlobalStyles from '../constants/Styles';
+import { useThemedStyles, useTheme } from '../contexts/ThemeContext';
 import { useHabits } from '../contexts/HabitsContext';
 import { getLogsByMonth } from '../config/firebase';
 
@@ -19,6 +19,8 @@ const getWeekdayOfFirst = (year, monthIndex) => {
 };
 
 export default function CalendarScreen() {
+  const GlobalStyles = useThemedStyles();
+  const { colors } = useTheme();
   const today = new Date();
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonthIndex, setCurrentMonthIndex] = useState(today.getMonth());
@@ -84,23 +86,23 @@ export default function CalendarScreen() {
     const completionRate = total > 0 ? (completed / total) * 100 : 0;
     
     // Determine background color based on completion
-    let backgroundColor = Colors.backgroundSecondary;
-    let borderColor = Colors.cardBorder;
+    let backgroundColor = colors.backgroundSecondary;
+    let borderColor = colors.cardBorder;
     
     if (completed > 0 && completed === total) {
-      backgroundColor = Colors.calendarCompleted + '15'; // Very light green
-      borderColor = Colors.calendarCompleted;
+      backgroundColor = colors.calendarCompleted + '15';
+      borderColor = colors.calendarCompleted;
     } else if (completed > 0) {
-      backgroundColor = Colors.calendarCompleted + '10'; // Very light green
-      borderColor = Colors.calendarCompleted + '40';
+      backgroundColor = colors.calendarCompleted + '10';
+      borderColor = colors.calendarCompleted + '40';
     } else if (missed > 0) {
-      backgroundColor = Colors.calendarMissed + '10'; // Very light red
-      borderColor = Colors.calendarMissed + '40';
+      backgroundColor = colors.calendarMissed + '10';
+      borderColor = colors.calendarMissed + '40';
     }
     
     if (isToday) {
-      backgroundColor = Colors.calendarToday + '20';
-      borderColor = Colors.calendarToday;
+      backgroundColor = colors.calendarToday + '20';
+      borderColor = colors.calendarToday;
     }
 
     return (
@@ -113,7 +115,7 @@ export default function CalendarScreen() {
           padding: 8,
           minHeight: 80,
           justifyContent: 'space-between',
-          shadowColor: Colors.cardShadow,
+          shadowColor: colors.cardShadow,
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.1,
           shadowRadius: 4,
@@ -123,7 +125,7 @@ export default function CalendarScreen() {
           <Text style={{
             fontSize: 20,
             fontWeight: isToday ? '800' : '600',
-            color: isToday ? Colors.calendarToday : Colors.textPrimary,
+            color: isToday ? colors.calendarToday : colors.textPrimary,
             textAlign: 'center',
             marginBottom: 4,
           }}>
@@ -136,7 +138,7 @@ export default function CalendarScreen() {
               {/* Progress bar */}
               <View style={{
                 height: 8,
-                backgroundColor: Colors.backgroundTertiary,
+                backgroundColor: colors.backgroundTertiary,
                 borderRadius: 4,
                 overflow: 'hidden',
                 marginBottom: 4,
@@ -144,7 +146,7 @@ export default function CalendarScreen() {
                 <View style={{
                   width: `${Math.min(100, completionRate)}%`,
                   height: '100%',
-                  backgroundColor: completed > 0 ? Colors.calendarCompleted : Colors.backgroundTertiary,
+                  backgroundColor: completed > 0 ? colors.calendarCompleted : colors.backgroundTertiary,
                   borderRadius: 4,
                 }} />
               </View>
@@ -153,13 +155,13 @@ export default function CalendarScreen() {
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 {completed > 0 && (
                   <View style={{
-                    backgroundColor: Colors.calendarCompleted,
+                    backgroundColor: colors.calendarCompleted,
                     borderRadius: 8,
                     paddingHorizontal: 6,
                     paddingVertical: 2,
                   }}>
                     <Text style={{
-                      color: Colors.textInverse,
+                      color: colors.textInverse,
                       fontSize: 10,
                       fontWeight: '600',
                     }}>
@@ -170,13 +172,13 @@ export default function CalendarScreen() {
                 
                 {missed > 0 && (
                   <View style={{
-                    backgroundColor: Colors.calendarMissed,
+                    backgroundColor: colors.calendarMissed,
                     borderRadius: 8,
                     paddingHorizontal: 6,
                     paddingVertical: 2,
                   }}>
                     <Text style={{
-                      color: Colors.textInverse,
+                      color: colors.textInverse,
                       fontSize: 10,
                       fontWeight: '600',
                     }}>
@@ -207,15 +209,15 @@ export default function CalendarScreen() {
         {/* Enhanced header card */}
         <View style={[GlobalStyles.card, { 
           marginBottom: 16,
-          backgroundColor: Colors.primary + '08',
-          borderColor: Colors.primary + '20',
+          backgroundColor: colors.primary + '08',
+          borderColor: colors.primary + '20',
           padding: 16,
         }]}>
           <View style={GlobalStyles.rowSpaceBetween}>
             <TouchableOpacity 
               style={{
-                backgroundColor: Colors.primary + '15',
-                borderColor: Colors.primary + '30',
+                backgroundColor: colors.primary + '15',
+                borderColor: colors.primary + '30',
                 width: 40,
                 height: 40,
                 borderRadius: 20,
@@ -226,14 +228,14 @@ export default function CalendarScreen() {
               onPress={() => changeMonth(-1)}
               activeOpacity={0.7}
             >
-              <Text style={{ color: Colors.primary, fontSize: 16, fontWeight: '600' }}>‹</Text>
+              <Text style={{ color: colors.primary, fontSize: 16, fontWeight: '600' }}>‹</Text>
             </TouchableOpacity>
             
             <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 16 }}>
               <Text style={{
                 fontSize: 22,
                 fontWeight: '700',
-                color: Colors.textPrimary,
+                color: colors.textPrimary,
                 textTransform: 'capitalize',
                 marginBottom: 2,
               }}>
@@ -241,7 +243,7 @@ export default function CalendarScreen() {
               </Text>
               <Text style={{
                 fontSize: 12,
-                color: Colors.textSecondary,
+                color: colors.textSecondary,
                 textAlign: 'center',
               }}>
                 Progreso de hábitos por día
@@ -250,8 +252,8 @@ export default function CalendarScreen() {
             
             <TouchableOpacity 
               style={{
-                backgroundColor: Colors.primary + '15',
-                borderColor: Colors.primary + '30',
+                backgroundColor: colors.primary + '15',
+                borderColor: colors.primary + '30',
                 width: 40,
                 height: 40,
                 borderRadius: 20,
@@ -262,7 +264,7 @@ export default function CalendarScreen() {
               onPress={() => changeMonth(1)}
               activeOpacity={0.7}
             >
-              <Text style={{ color: Colors.primary, fontSize: 16, fontWeight: '600' }}>›</Text>
+              <Text style={{ color: colors.primary, fontSize: 16, fontWeight: '600' }}>›</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -275,7 +277,7 @@ export default function CalendarScreen() {
         }}>
           <Text style={{
             fontSize: 12,
-            color: Colors.textTertiary,
+            color: colors.textTertiary,
             textAlign: 'center',
             fontStyle: 'italic',
           }}>
@@ -289,7 +291,7 @@ export default function CalendarScreen() {
             flexDirection: 'row', 
             paddingHorizontal: 8,
             marginBottom: 16,
-            backgroundColor: Colors.backgroundSecondary,
+            backgroundColor: colors.backgroundSecondary,
             borderRadius: 12,
             paddingVertical: 12,
           }}>
@@ -297,7 +299,7 @@ export default function CalendarScreen() {
               <Text key={d} style={{
                 flex: 1,
                 textAlign: 'center',
-                color: Colors.textSecondary,
+                color: colors.textSecondary,
                 fontSize: 16,
                 fontWeight: '600',
                 textTransform: 'uppercase',
@@ -320,15 +322,15 @@ export default function CalendarScreen() {
           marginTop: 20,
           marginHorizontal: 16,
           padding: 16,
-          backgroundColor: Colors.backgroundSecondary,
+          backgroundColor: colors.backgroundSecondary,
           borderRadius: 12,
           borderWidth: 1,
-          borderColor: Colors.cardBorder,
+          borderColor: colors.cardBorder,
         }}>
           <Text style={{
             fontSize: 16,
             fontWeight: '600',
-            color: Colors.textPrimary,
+            color: colors.textPrimary,
             marginBottom: 12,
             textAlign: 'center',
           }}>
@@ -339,37 +341,37 @@ export default function CalendarScreen() {
               <View style={{
                 width: 20,
                 height: 20,
-                backgroundColor: Colors.calendarCompleted + '20',
+                backgroundColor: colors.calendarCompleted + '20',
                 borderWidth: 2,
-                borderColor: Colors.calendarCompleted,
+                borderColor: colors.calendarCompleted,
                 borderRadius: 6,
                 marginBottom: 4,
               }} />
-              <Text style={{ fontSize: 12, color: Colors.textSecondary }}>Completado</Text>
+              <Text style={{ fontSize: 12, color: colors.textSecondary }}>Completado</Text>
             </View>
             <View style={{ alignItems: 'center' }}>
               <View style={{
                 width: 20,
                 height: 20,
-                backgroundColor: Colors.calendarMissed + '20',
+                backgroundColor: colors.calendarMissed + '20',
                 borderWidth: 2,
-                borderColor: Colors.calendarMissed,
+                borderColor: colors.calendarMissed,
                 borderRadius: 6,
                 marginBottom: 4,
               }} />
-              <Text style={{ fontSize: 12, color: Colors.textSecondary }}>Perdido</Text>
+              <Text style={{ fontSize: 12, color: colors.textSecondary }}>Perdido</Text>
             </View>
             <View style={{ alignItems: 'center' }}>
               <View style={{
                 width: 20,
                 height: 20,
-                backgroundColor: Colors.calendarToday + '20',
+                backgroundColor: colors.calendarToday + '20',
                 borderWidth: 2,
-                borderColor: Colors.calendarToday,
+                borderColor: colors.calendarToday,
                 borderRadius: 6,
                 marginBottom: 4,
               }} />
-              <Text style={{ fontSize: 12, color: Colors.textSecondary }}>Hoy</Text>
+              <Text style={{ fontSize: 12, color: colors.textSecondary }}>Hoy</Text>
             </View>
           </View>
         </View>

@@ -50,7 +50,7 @@ class NotificationService {
       if (!hasPermission) return null;
 
       const token = await Notifications.getExpoPushTokenAsync({
-        projectId: 'tu-project-id', // Necesitarás configurar esto
+        projectId: 'habittrackerapp-5a791', // Project ID from Firebase config
       });
       
       this.expoPushToken = token.data;

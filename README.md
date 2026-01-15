@@ -233,10 +233,46 @@ Si ves el error "NAVIGATE not handled":
 - Asegúrate de que Firestore esté habilitado
 - Revisa las reglas de seguridad
 
-### Problemas de Red
-- Usa `--tunnel` para desarrollo: `npx expo start --tunnel`
-- Verifica la conexión a internet
-- Revisa los logs de Firebase
+### Problemas de Red / Tunnel
+
+Si tienes problemas con el tunnel de ngrok ("ngrok tunnel took too long to connect"):
+
+#### Soluciones Rápidas:
+1. **Usar script con reintentos**:
+   ```powershell
+   npm run start:tunnel
+   ```
+   O usar el script de PowerShell:
+   ```powershell
+   .\start-tunnel.ps1
+   ```
+
+2. **Limpiar caché antes de iniciar**:
+   ```powershell
+   npm run start:tunnel
+   ```
+   (Este comando incluye `--clear` automáticamente)
+
+3. **Configurar token de ngrok** (Recomendado):
+   - Crea una cuenta gratuita en [ngrok.com](https://ngrok.com/)
+   - Obtén tu token de autenticación
+   - Ejecuta: `ngrok authtoken TU_TOKEN`
+   - Luego usa: `npm run start:tunnel`
+
+4. **Verificar red y firewall**:
+   - Asegúrate de tener conexión estable a internet
+   - Verifica que tu firewall/antivirus no bloquee ngrok
+   - Si usas VPN, prueba desactivarla temporalmente
+
+5. **Actualizar dependencias**:
+   ```powershell
+   npm install @expo/ngrok@latest --save
+   ```
+
+#### Comandos Disponibles:
+- `npm run start:tunnel` - Inicia con tunnel y limpia caché
+- `npm run start:tunnel:retry` - Inicia con tunnel sin limpiar caché
+- `.\start-tunnel.ps1` - Script de PowerShell con reintentos automáticos
 
 ## 📱 Compatibilidad
 
