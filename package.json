@@ -4,12 +4,21 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "expo start --dev-client",
-    "start:tunnel": "expo start --dev-client --tunnel --clear",
-    "start:tunnel:retry": "expo start --dev-client --tunnel",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web"
+    "start": "powershell -ExecutionPolicy Bypass -File ./start-expo.ps1",
+    "start:original": "npx expo start --dev-client",
+    "start:tunnel": "npx expo start --dev-client --tunnel --clear",
+    "start:tunnel:retry": "npx expo start --dev-client --tunnel",
+    "start:lan": "powershell -ExecutionPolicy Bypass -File ./start-without-tunnel.ps1",
+    "setup:ngrok": "powershell -ExecutionPolicy Bypass -File ./configurar-ngrok-simple.ps1",
+    "check:ngrok": "powershell -ExecutionPolicy Bypass -File ./check-ngrok.ps1",
+    "fix:ngrok": "powershell -ExecutionPolicy Bypass -File ./fix-ngrok.ps1",
+    "diagnostico:red": "powershell -ExecutionPolicy Bypass -File ./diagnostico-red.ps1",
+    "fix:deps": "powershell -ExecutionPolicy Bypass -File ./fix-dependencies.ps1",
+    "fix:ngrok": "powershell -ExecutionPolicy Bypass -File ./solucionar-ngrok-definitivo.ps1",
+    "arreglar:ngrok": "powershell -ExecutionPolicy Bypass -File ./arreglar-ngrok-config.ps1",
+    "android": "npx expo run:android",
+    "ios": "npx expo run:ios",
+    "web": "npx expo start --web"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
