@@ -17,7 +17,7 @@ import { useThemedStyles, useTheme } from '../contexts/ThemeContext';
 import { createHabit } from '../config/firebase';
 import Toast from 'react-native-toast-message';
 
-const CATEGORIES = [
+const categories = [
   'Salud',
   'Desarrollo Personal',
   'Bienestar',
@@ -25,54 +25,65 @@ const CATEGORIES = [
   'Aprendizaje',
   'Social',
   'Finanzas',
-  'Otros',
+  'Otros'
 ];
 
-const DAY_LABELS = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+const dayLabels = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
 
 export default function CreateHabitScreen({ navigation }) {
   const GlobalStyles = useThemedStyles();
   const { colors } = useTheme();
-
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [time, setTime] = useState('');
-  const [daysOfWeek, setDaysOfWeek] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
+  const [debugInfo, setDebugInfo] = useState('');
+  const [daysOfWeek, setDaysOfWeek] = useState([]); // 0..6 Domingo..Sábado
 
-  /* =========================
-     Helpers
-  ========================== */
-
-  const validateForm = () => {
-    if (!title.trim()) return 'Por favor ingresa un título para el hábito';
-    if (!description.trim()) return 'Por favor ingresa una descripción';
-    if (!category) return 'Por favor selecciona una categoría';
-    if (!time) return 'Por favor selecciona una hora';
-    return null;
+  // Debug function to log state changes
+  const logState = (action, data) => {
+    const info = `${action}: ${JSON.stringify(data)}`;
+    console.log(info);
+    setDebugInfo(prev => prev + '\n' + info);
   };
 
-  const formatTime = (date) => {
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  };
-
-  /* =========================
-     Actions
-  ========================== */
+  // Clear debug info when component mounts
+  React.useEffect(() => {
+    logState('Component mounted', { title, description, category, time });
+  }, []);
 
   const handleCreateHabit = async () => {
-    const errorMessage = validateForm();
-    if (errorMessage) {
-      Alert.alert('Error', errorMessage);
+    logState('Creating habit started', { title, description, category, time });
+    
+    // Validation
+    if (!title.trim()) {
+      logState('Validation failed', 'Title is empty');
+      Alert.alert('Error', 'Por favor ingresa un título para el hábito');
       return;
     }
 
+    if (!description.trim()) {
+      logState('Validation failed', 'Description is empty');
+      Alert.alert('Error', 'Por favor ingresa una descripción');
+      return;
+    }
+
+    if (!category) {
+      logState('Validation failed', 'Category not selected');
+      Alert.alert('Error', 'Por favor selecciona una categoría');
+      return;
+    }
+
+    if (!time) {
+      logState('Validation failed', 'Time not selected');
+      Alert.alert('Error', 'Por favor selecciona una hora');
+      return;
+    }
+
+    logState('Validation passed', 'All fields are valid');
     setIsLoading(true);
 
     try {
@@ -82,19 +93,21 @@ export default function CreateHabitScreen({ navigation }) {
         category,
         time,
         status: 'pending',
-        daysOfWeek, // [] = diario
+        daysOfWeek, // nuevo campo
       };
 
+      logState('Sending habit data', habitData);
       const result = await createHabit(habitData);
 
       if (result.success) {
+        logState('Habit created successfully', result);
         Toast.show({
           type: 'success',
           text1: '¡Hábito creado!',
           position: 'bottom',
           visibilityTime: 1500,
         });
-
+        // Clear form and navigate back
         setTitle('');
         setDescription('');
         setCategory('');
@@ -102,114 +115,194 @@ export default function CreateHabitScreen({ navigation }) {
         setDaysOfWeek([]);
         navigation.goBack();
       } else {
+        logState('Habit creation failed', result.error);
         Alert.alert('Error', result.error || 'Error al crear el hábito');
       }
     } catch (error) {
+      logState('Unexpected error', error.message);
       console.error('Error creating habit:', error);
       Alert.alert('Error', 'Ocurrió un error inesperado. Intenta de nuevo.');
     } finally {
+      logState('Loading state ended', '');
       setIsLoading(false);
     }
   };
 
   const handleTimeSelection = () => {
     if (Platform.OS === 'android') {
+      // For Android, use the native time picker
       try {
         DateTimePickerAndroid.open({
           value: selectedTime,
-          mode: 'time',
-          is24Hour: true,
           onChange: (event, date) => {
+            console.log('Time picker event:', event, 'date:', date);
+            
+            // Handle the event properly
             if (event.type === 'set' && date) {
               setSelectedTime(date);
-              setTime(formatTime(date));
+              const hours = date.getHours().toString().padStart(2, '0');
+              const minutes = date.getMinutes().toString().padStart(2, '0');
+              const timeString = `${hours}:${minutes}`;
+              console.log('Setting time to:', timeString);
+              setTime(timeString);
+            } else if (event.type === 'dismissed') {
+              console.log('Time picker dismissed');
+              // Don't change anything if dismissed
             }
           },
+          onError: (error) => {
+            console.error('Time picker error:', error);
+            // Fallback to simple time selection
+            showTimeSelectionFallback();
+          },
+          mode: 'time',
+          is24Hour: true,
         });
-      } catch {
-        Alert.alert('Error', 'No se pudo abrir el selector de hora');
+      } catch (error) {
+        console.error('Error opening time picker:', error);
+        // Fallback to simple time selection
+        showTimeSelectionFallback();
       }
     } else {
+      // For iOS, show modal with time picker
       setShowTimePicker(true);
     }
   };
 
-  /* =========================
-     UI
-  ========================== */
+  const showTimeSelectionFallback = () => {
+    const times = ['06:00', '07:00', '08:00', '09:00', '12:00', '15:00', '18:00', '20:00', '21:00'];
+    Alert.alert(
+      'Seleccionar Hora',
+      'Elige una hora para tu hábito',
+      [
+        ...times.map(timeOption => ({
+          text: timeOption,
+          onPress: () => {
+            console.log('Fallback time selected:', timeOption);
+            setTime(timeOption);
+          }
+        })),
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+          onPress: () => console.log('Time selection cancelled')
+        }
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const handleTimeConfirm = (event, date) => {
+    console.log('iOS time picker confirm:', event, 'date:', date);
+    setShowTimePicker(false);
+    if (date) {
+      setSelectedTime(date);
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const timeString = `${hours}:${minutes}`;
+      console.log('Setting time to:', timeString);
+      setTime(timeString);
+    }
+  };
+
+  const handleTimeCancel = () => {
+    console.log('Time picker cancelled');
+    setShowTimePicker(false);
+  };
 
   return (
     <SafeAreaView style={GlobalStyles.safeArea}>
-      <KeyboardAvoidingView
+      <KeyboardAvoidingView 
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
-          keyboardShouldPersistTaps="handled"
+        <ScrollView 
+          style={{ flex: 1 }}
+          contentContainerStyle={{ 
+            paddingHorizontal: 16,
+            paddingVertical: 20,
+            paddingBottom: 40
+          }}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
           <View style={[GlobalStyles.card, { marginBottom: 20, alignItems: 'center' }]}>
-            <Text style={[GlobalStyles.title, { color: colors.primary }]}>
+            <Text style={[GlobalStyles.title, { color: colors.primary, textAlign: 'center' }]}>
               Crear Nuevo Hábito
             </Text>
-            <Text style={[GlobalStyles.caption, { marginTop: 6, textAlign: 'center' }]}>
+            <Text style={[GlobalStyles.caption, { textAlign: 'center', marginTop: 6 }]}>
               Define tu nuevo hábito y comienza tu viaje
             </Text>
           </View>
 
           {/* Form */}
-          <View style={GlobalStyles.card}>
-            {/* Title */}
+          <View style={[GlobalStyles.card, { marginBottom: 20 }]}>
+            {/* Title Input */}
             <View style={{ marginBottom: 16 }}>
-              <Text style={GlobalStyles.caption}>Título del Hábito *</Text>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
+                Título del Hábito *
+              </Text>
               <TextInput
                 style={GlobalStyles.input}
                 placeholder="Ej: Ejercicio matutino"
+                placeholderTextColor={colors.textTertiary}
                 value={title}
                 onChangeText={setTitle}
-                editable={!isLoading}
                 maxLength={50}
+                editable={!isLoading}
               />
             </View>
 
-            {/* Description */}
+            {/* Description Input */}
             <View style={{ marginBottom: 16 }}>
-              <Text style={GlobalStyles.caption}>Descripción *</Text>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
+                Descripción *
+              </Text>
               <TextInput
                 style={[GlobalStyles.input, { height: 80, textAlignVertical: 'top' }]}
-                placeholder="Describe tu hábito..."
+                placeholder="Describe tu hábito en detalle..."
+                placeholderTextColor={colors.textTertiary}
                 value={description}
                 onChangeText={setDescription}
                 multiline
-                editable={!isLoading}
+                numberOfLines={3}
                 maxLength={200}
+                editable={!isLoading}
               />
             </View>
 
-            {/* Category */}
+            {/* Category Selection */}
             <View style={{ marginBottom: 16 }}>
-              <Text style={GlobalStyles.caption}>Categoría *</Text>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
+                Categoría *
+              </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {CATEGORIES.map(cat => (
+                {categories.map((cat) => (
                   <TouchableOpacity
                     key={cat}
-                    disabled={isLoading}
+                    style={[
+                      {
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 20,
+                        borderWidth: 2,
+                        borderColor: category === cat ? colors.primary : colors.cardBorder,
+                        backgroundColor: category === cat ? colors.primary : colors.backgroundSecondary,
+                        marginBottom: 8,
+                      },
+                      !isLoading && { opacity: 0.8 }
+                    ]}
                     onPress={() => setCategory(cat)}
-                    style={{
-                      paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      borderRadius: 20,
-                      borderWidth: 2,
-                      borderColor: category === cat ? colors.primary : colors.cardBorder,
-                      backgroundColor: category === cat ? colors.primary : colors.backgroundSecondary,
-                    }}
+                    disabled={isLoading}
                   >
-                    <Text style={{
-                      color: category === cat ? colors.textInverse : colors.textSecondary,
-                      fontWeight: '600',
-                    }}>
+                    <Text style={[
+                      GlobalStyles.smallText,
+                      { 
+                        color: category === cat ? colors.textInverse : colors.textSecondary,
+                        fontWeight: category === cat ? '600' : '400'
+                      }
+                    ]}>
                       {cat}
                     </Text>
                   </TouchableOpacity>
@@ -217,42 +310,31 @@ export default function CreateHabitScreen({ navigation }) {
               </View>
             </View>
 
-            {/* Days */}
+            {/* Time Selection */}
             <View style={{ marginBottom: 16 }}>
-              <Text style={GlobalStyles.caption}>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
                 Días de la semana (si no eliges, será diario)
               </Text>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                {DAY_LABELS.map((label, idx) => (
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                {dayLabels.map((label, idx) => (
                   <TouchableOpacity
                     key={label}
-                    disabled={isLoading}
-                    onPress={() =>
-                      setDaysOfWeek(prev =>
-                        prev.includes(idx)
-                          ? prev.filter(d => d !== idx)
-                          : [...prev, idx]
-                      )
-                    }
                     style={{
                       width: 36,
                       height: 36,
                       borderRadius: 18,
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: daysOfWeek.includes(idx)
-                        ? colors.primary
-                        : colors.backgroundSecondary,
+                      backgroundColor: daysOfWeek.includes(idx) ? colors.primary : colors.backgroundSecondary,
                       borderWidth: 1,
-                      borderColor: colors.cardBorder,
+                      borderColor: daysOfWeek.includes(idx) ? colors.primary : colors.cardBorder,
                     }}
+                    onPress={() => {
+                      setDaysOfWeek(prev => prev.includes(idx) ? prev.filter(d => d !== idx) : [...prev, idx]);
+                    }}
+                    disabled={isLoading}
                   >
-                    <Text style={{
-                      color: daysOfWeek.includes(idx)
-                        ? colors.textInverse
-                        : colors.textSecondary,
-                      fontWeight: '600',
-                    }}>
+                    <Text style={{ color: daysOfWeek.includes(idx) ? colors.textInverse : colors.textSecondary, fontWeight: '600' }}>
                       {label}
                     </Text>
                   </TouchableOpacity>
@@ -260,63 +342,191 @@ export default function CreateHabitScreen({ navigation }) {
               </View>
             </View>
 
-            {/* Time */}
+            {/* Time Selection */}
             <View style={{ marginBottom: 24 }}>
-              <Text style={GlobalStyles.caption}>Hora del Día *</Text>
+              <Text style={[GlobalStyles.caption, { marginBottom: 6, color: colors.textPrimary }]}>
+                Hora del Día *
+              </Text>
               <TouchableOpacity
-                disabled={isLoading}
+                style={[
+                  GlobalStyles.input,
+                  { 
+                    justifyContent: 'center',
+                    backgroundColor: time ? colors.backgroundSecondary : Colors.inputBackground
+                  }
+                ]}
                 onPress={handleTimeSelection}
-                style={[GlobalStyles.input, { justifyContent: 'center' }]}
+                disabled={isLoading}
               >
-                <Text style={{ textAlign: 'center' }}>
+                <Text style={[
+                  GlobalStyles.caption,
+                  { 
+                    color: time ? colors.textPrimary : colors.textTertiary,
+                    textAlign: 'center'
+                  }
+                ]}>
                   {time || 'Seleccionar hora'}
                 </Text>
               </TouchableOpacity>
             </View>
 
-            {/* Buttons */}
+            {/* Create Button */}
             <TouchableOpacity
-              style={GlobalStyles.buttonPrimary}
-              disabled={isLoading}
+              style={[
+                GlobalStyles.buttonPrimary,
+                { marginBottom: 12 },
+                isLoading && { opacity: 0.7 }
+              ]}
               onPress={handleCreateHabit}
+              disabled={isLoading}
             >
               <Text style={GlobalStyles.buttonText}>
                 {isLoading ? 'Creando...' : 'Crear Hábito'}
               </Text>
             </TouchableOpacity>
 
+            {/* Cancel Button */}
             <TouchableOpacity
-              style={[GlobalStyles.buttonSecondary, { marginTop: 12 }]}
-              disabled={isLoading}
+              style={[
+                GlobalStyles.buttonSecondary,
+                { marginBottom: 12 }
+              ]}
               onPress={() => navigation.goBack()}
+              disabled={isLoading}
             >
-              <Text style={GlobalStyles.buttonTextSecondary}>Cancelar</Text>
+              <Text style={GlobalStyles.buttonTextSecondary}>
+                Cancelar
+              </Text>
             </TouchableOpacity>
+
+            {/* Reset Button - Only in development */}
+            {__DEV__ && (
+              <TouchableOpacity
+                style={[
+                  GlobalStyles.buttonSecondary,
+                  { 
+                    marginBottom: 12,
+                  backgroundColor: colors.accent + '20',
+                  borderColor: colors.accent
+                  }
+                ]}
+                onPress={() => {
+                  logState('Reset button pressed', '');
+                  setTitle('');
+                  setDescription('');
+                  setCategory('');
+                  setTime('');
+                  setSelectedTime(new Date());
+                  setShowTimePicker(false);
+                  setDaysOfWeek([]);
+                  setDebugInfo('');
+                }}
+                disabled={isLoading}
+              >
+              <Text style={[GlobalStyles.buttonTextSecondary, { color: colors.accent }]}>
+                  🔄 Reset (Debug)
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Tips */}
+          <View style={[GlobalStyles.card, { marginBottom: 20 }]}>
+            <Text style={[GlobalStyles.subtitle, { textAlign: 'center', marginBottom: 12 }]}>
+              💡 Consejos para crear hábitos exitosos
+            </Text>
+            <View style={{ gap: 8 }}>
+              <View style={GlobalStyles.row}>
+                <Text style={[GlobalStyles.caption, { color: Colors.textSecondary }]}>
+                  • Comienza con hábitos pequeños y específicos
+                </Text>
+              </View>
+              <View style={GlobalStyles.row}>
+                <Text style={[GlobalStyles.caption, { color: Colors.textSecondary }]}>
+                  • Elige una hora consistente cada día
+                </Text>
+              </View>
+              <View style={GlobalStyles.row}>
+                <Text style={[GlobalStyles.caption, { color: Colors.textSecondary }]}>
+                  • Conecta el hábito con una actividad existente
+                </Text>
+              </View>
+              <View style={GlobalStyles.row}>
+                <Text style={[GlobalStyles.caption, { color: Colors.textSecondary }]}>
+                  • Celebra cada pequeño progreso
+                </Text>
+              </View>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* iOS Time Picker */}
-      <Modal visible={showTimePicker} transparent animationType="slide">
+      {/* Debug Info - Only show in development */}
+      {__DEV__ && debugInfo && (
+        <View style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: 10,
+          maxHeight: 100,
+        }}>
+          <Text style={{ color: 'white', fontSize: 10 }}>
+            Debug: {debugInfo.split('\n').slice(-3).join('\n')}
+          </Text>
+        </View>
+      )}
+
+      {/* Time Picker Modal for iOS */}
+      <Modal
+        visible={showTimePicker}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={handleTimeCancel}
+        presentationStyle="pageSheet"
+      >
         <View style={GlobalStyles.modalOverlay}>
           <View style={[GlobalStyles.modalContent, { padding: 20 }]}>
+            <View style={{ 
+              flexDirection: 'row', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              marginBottom: 20,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.cardBorder,
+              paddingBottom: 15
+            }}>
+              <Text style={[GlobalStyles.subtitle, { color: colors.textPrimary }]}>
+                Seleccionar Hora
+              </Text>
+              <TouchableOpacity onPress={handleTimeCancel}>
+                <Text style={{ color: colors.primary, fontSize: 16, fontWeight: '600' }}>
+                  Cancelar
+                </Text>
+              </TouchableOpacity>
+            </View>
+            
             <DateTimePicker
               value={selectedTime}
               mode="time"
-              is24Hour
+              is24Hour={true}
               display="spinner"
-              onChange={(e, date) => {
-                if (date) {
-                  setSelectedTime(date);
-                  setTime(formatTime(date));
-                }
-              }}
+              onChange={handleTimeConfirm}
+              style={{ marginBottom: 20 }}
             />
+            
             <TouchableOpacity
-              style={[GlobalStyles.buttonPrimary, { marginTop: 16 }]}
-              onPress={() => setShowTimePicker(false)}
+              style={[GlobalStyles.buttonPrimary, { marginTop: 10 }]}
+              onPress={() => {
+                const hours = selectedTime.getHours().toString().padStart(2, '0');
+                const minutes = selectedTime.getMinutes().toString().padStart(2, '0');
+                const timeString = `${hours}:${minutes}`;
+                setTime(timeString);
+                setShowTimePicker(false);
+              }}
             >
-              <Text style={GlobalStyles.buttonText}>Confirmar</Text>
+              <Text style={GlobalStyles.buttonText}>Confirmar Hora</Text>
             </TouchableOpacity>
           </View>
         </View>
