@@ -11,14 +11,14 @@
     "start:lan": "powershell -ExecutionPolicy Bypass -File ./start-without-tunnel.ps1",
     "setup:ngrok": "powershell -ExecutionPolicy Bypass -File ./configurar-ngrok-simple.ps1",
     "check:ngrok": "powershell -ExecutionPolicy Bypass -File ./check-ngrok.ps1",
-    "fix:ngrok": "powershell -ExecutionPolicy Bypass -File ./fix-ngrok.ps1",
+    "fix:ngrok": "powershell -ExecutionPolicy Bypass -File ./solucionar-ngrok-definitivo.ps1",
     "diagnostico:red": "powershell -ExecutionPolicy Bypass -File ./diagnostico-red.ps1",
     "fix:deps": "powershell -ExecutionPolicy Bypass -File ./fix-dependencies.ps1",
-    "fix:ngrok": "powershell -ExecutionPolicy Bypass -File ./solucionar-ngrok-definitivo.ps1",
     "arreglar:ngrok": "powershell -ExecutionPolicy Bypass -File ./arreglar-ngrok-config.ps1",
     "android": "npx expo run:android",
     "ios": "npx expo run:ios",
-    "web": "npx expo start --web"
+    "web": "npx expo start --web",
+    "test": "jest"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
@@ -49,7 +49,15 @@
     "react-native-web": "^0.21.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "jest": "^29.7.0",
+    "jest-expo": "^54.0.17"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
   },
   "private": true
 }

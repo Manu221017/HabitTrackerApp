@@ -7,16 +7,16 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
 // Import screens
-import LoginScreen from './screens/LoginScreen';
-import RegisterScreen from './screens/RegisterScreen';
-import HomeScreen from './screens/HomeScreen';
-import CreateHabitScreen from './screens/CreateHabitScreen';
-import CalendarScreen from './screens/CalendarScreen';
-import StatisticsScreen from './screens/StatisticsScreen';
-import RemindersScreen from './screens/RemindersScreen';
-import NotificationSettingsScreen from './screens/NotificationSettingsScreen';
-import GamificationScreen from './screens/GamificationScreen';
-import AdvancedStatisticsScreen from './screens/AdvancedStatisticsScreen';
+import LoginScreen from './screens/auth/LoginScreen';
+import RegisterScreen from './screens/auth/RegisterScreen';
+import HomeScreen from './screens/habits/HomeScreen';
+import CreateHabitScreen from './screens/habits/CreateHabitScreen';
+import CalendarScreen from './screens/habits/CalendarScreen';
+import StatisticsScreen from './screens/stats/StatisticsScreen';
+import RemindersScreen from './screens/habits/RemindersScreen';
+import NotificationSettingsScreen from './screens/settings/NotificationSettingsScreen';
+import GamificationScreen from './screens/gamification/GamificationScreen';
+import AdvancedStatisticsScreen from './screens/stats/AdvancedStatisticsScreen';
 
 // Import contexts
 import { AuthProvider, useAuth } from './contexts/AuthContext';
