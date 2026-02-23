@@ -1,15 +1,15 @@
-import NotificationService from '../services/NotificationService';
+import NotificationService from '../backend/services/NotificationService';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getNotificationMessage, isQuietHours } from '../config/notificationConfig';
+import { getNotificationMessage, isQuietHours } from '../backend/config/notificationConfig';
 
 jest.mock('expo-notifications');
 jest.mock('expo-device');
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
-jest.mock('../config/notificationConfig', () => ({
+jest.mock('../backend/config/notificationConfig', () => ({
   getNotificationMessage: jest.fn(),
   isQuietHours: jest.fn(),
   getNotificationPriority: jest.fn(),

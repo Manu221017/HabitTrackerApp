@@ -3,7 +3,7 @@ import NOTIFICATION_CONFIG, {
   getCategoryConfig,
   isQuietHours,
   getNotificationPriority,
-} from '../config/notificationConfig';
+} from '../backend/config/notificationConfig';
 
 describe('notificationConfig', () => {
   describe('getNotificationMessage', () => {
