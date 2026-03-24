@@ -362,7 +362,7 @@ export default function NotificationSettingsScreen({ navigation }) {
           <Text style={[styles.infoTitle, { color: colors.textPrimary }]}>💡 Consejos</Text>
           <Text style={[styles.infoText, { color: colors.textSecondary }]}>
             • Las notificaciones funcionan mejor cuando la app está cerrada{'\n'}
-            • Asegúrate de que tu dispositivo no esté en modo "No molestar"{'\n'}
+            • Asegúrate de que tu dispositivo no esté en modo «No molestar»{'\n'}
             • Las notificaciones se adaptan a tu zona horaria{'\n'}
             • Puedes cambiar la hora de los recordatorios editando cada hábito
           </Text>

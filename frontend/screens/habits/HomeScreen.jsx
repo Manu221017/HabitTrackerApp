@@ -16,17 +16,16 @@ import {
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
-import { useThemedStyles } from '../../contexts/ThemeContext';
+import { useThemedStyles, useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useHabits } from '../../contexts/HabitsContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import GamificationCard from '../../components/GamificationCard';
 import QuickStatsCard from '../../components/QuickStatsCard';
 import { logOut, updateHabitStatus } from '../../../backend/config/firebase';
 import Toast from 'react-native-toast-message';
 
 // Componente para el botón animado de check
-function HabitCheckButton({ status, onPress }) {
+function HabitCheckButton({ status, habitTitle, onPress }) {
   const { colors } = useTheme();
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -62,6 +61,13 @@ function HabitCheckButton({ status, onPress }) {
           }}
         onPress={handlePress}
         activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityState={{ checked: status === 'completed' }}
+        accessibilityLabel={
+          status === 'completed'
+            ? `Desmarcar como completado: ${habitTitle || 'hábito'}`
+            : `Marcar como completado: ${habitTitle || 'hábito'}`
+        }
       >
         <Text style={{
           fontSize: 16,
@@ -86,7 +92,8 @@ export default function HomeScreen({ navigation }) {
     setError,
     getProgressPercentage,
     getTotalStreak,
-    getBestStreak
+    getBestStreak,
+    completeHabit,
   } = useHabits();
   const [refreshing, setRefreshing] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -206,7 +213,11 @@ export default function HomeScreen({ navigation }) {
       
       if (!result.success) {
         Alert.alert('Error', result.error || 'Error al actualizar el hábito');
-      } else if (newStatus === 'completed') {
+      } else if (newStatus === 'completed' && currentStatus !== 'completed') {
+        const gam = await completeHabit(habitId);
+        if (gam && typeof gam === 'object' && gam.success === false) {
+          console.warn('No se pudo aplicar gamificación:', gam.error);
+        }
         Toast.show({
           type: 'success',
           text1: '¡Hábito completado!',
@@ -226,7 +237,18 @@ export default function HomeScreen({ navigation }) {
       const result = await updateHabitStatus(habitId, 'completed');
       if (!result.success) {
         Alert.alert('Error', result.error || 'Error al actualizar el hábito');
+        return;
       }
+      const gam = await completeHabit(habitId);
+      if (gam && typeof gam === 'object' && gam.success === false) {
+        console.warn('No se pudo aplicar gamificación:', gam.error);
+      }
+      Toast.show({
+        type: 'success',
+        text1: '¡Hábito completado!',
+        position: 'bottom',
+        visibilityTime: 1500,
+      });
     } catch (error) {
       console.error('Error updating habit:', error);
       Alert.alert('Error', 'Error al actualizar el hábito');
@@ -300,6 +322,7 @@ export default function HomeScreen({ navigation }) {
         </View>
         <HabitCheckButton
           status={item.status}
+          habitTitle={item.title}
           onPress={() => toggleHabitStatus(item.id, item.status)}
         />
       </View>
@@ -459,6 +482,8 @@ export default function HomeScreen({ navigation }) {
                   borderColor: colors.cardBorder,
                 }}
                 onPress={toggleTheme}
+                accessibilityRole="button"
+                accessibilityLabel={isDarkMode ? 'Activar tema claro' : 'Activar tema oscuro'}
               >
                 <Text style={[GlobalStyles.smallText, { color: colors.textSecondary }]}>
                   {isDarkMode ? '☀️' : '🌙'}
@@ -474,6 +499,8 @@ export default function HomeScreen({ navigation }) {
                   borderColor: colors.cardBorder,
               }}
               onPress={handleLogout}
+              accessibilityRole="button"
+              accessibilityLabel="Cerrar sesión"
             >
                 <Text style={[GlobalStyles.smallText, { color: colors.textSecondary }]}>
                 Cerrar Sesión
@@ -535,6 +562,8 @@ export default function HomeScreen({ navigation }) {
                 <TouchableOpacity
                   style={[GlobalStyles.buttonSmall, { backgroundColor: colors.success }]}
                   onPress={() => markHabitCompleted(h.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Marcar como hecho: ${h.title}`}
                 >
                   <Text style={GlobalStyles.buttonText}>Hecho</Text>
                 </TouchableOpacity>

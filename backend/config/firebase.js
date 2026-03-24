@@ -14,7 +14,6 @@ import {
   collection,
   addDoc,
   updateDoc,
-  deleteDoc,
   doc,
   query,
   where,
@@ -25,17 +24,41 @@ import {
   setDoc
 } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
-// Your Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyA_E-JAqxL3uRpLCeNLqPB2c35ILowTlDg",
-  authDomain: "habittrackerapp-5a791.firebaseapp.com",
-  projectId: "habittrackerapp-5a791",
-  storageBucket: "habittrackerapp-5a791.firebasestorage.app",
-  messagingSenderId: "919333458595",
-  appId: "1:919333458595:web:5bcab2c31b8d91c5516516",
-  measurementId: "G-STNN8JQN06"
-};
+function buildFirebaseConfig() {
+  const extra = Constants.expoConfig?.extra?.firebase ?? {};
+  const trim = (v) => (v == null ? '' : String(v).trim());
+
+  return {
+    apiKey: trim(extra.apiKey || process.env.EXPO_PUBLIC_FIREBASE_API_KEY),
+    authDomain: trim(extra.authDomain || process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN),
+    projectId: trim(extra.projectId || process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID),
+    storageBucket: trim(extra.storageBucket || process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET),
+    messagingSenderId: trim(extra.messagingSenderId || process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID),
+    appId: trim(extra.appId || process.env.EXPO_PUBLIC_FIREBASE_APP_ID),
+    measurementId: trim(extra.measurementId || process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID),
+  };
+}
+
+const firebaseConfig = buildFirebaseConfig();
+
+const requiredFirebaseKeys = [
+  'apiKey',
+  'authDomain',
+  'projectId',
+  'storageBucket',
+  'messagingSenderId',
+  'appId',
+];
+
+const missingFirebase = requiredFirebaseKeys.filter((k) => !firebaseConfig[k]);
+if (missingFirebase.length > 0) {
+  throw new Error(
+    `[Firebase] Faltan claves: ${missingFirebase.join(', ')}. ` +
+      'Crea un archivo .env en la raíz con EXPO_PUBLIC_FIREBASE_* (plantilla en .env.example) y reinicia Expo con npx expo start --clear.'
+  );
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

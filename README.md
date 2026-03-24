@@ -36,7 +36,7 @@ Una aplicación móvil moderna y completa para crear, gestionar y hacer seguimie
 
 - **Frontend**: React Native + Expo
 - **Backend**: Firebase (Authentication + Firestore)
-- **Navegación**: React Navigation v6
+- **Navegación**: React Navigation v7
 - **Estado**: React Context API
 - **Almacenamiento**: AsyncStorage
 - **Estilos**: StyleSheet nativo con sistema de diseño
@@ -45,21 +45,22 @@ Una aplicación móvil moderna y completa para crear, gestionar y hacer seguimie
 
 ```
 HabitTrackerApp/
-├── config/
-│   └── firebase.js          # Configuración de Firebase
-├── constants/
-│   ├── Colors.js            # Paleta de colores
-│   └── Styles.js            # Estilos globales
-├── contexts/
-│   ├── AuthContext.js       # Contexto de autenticación
-│   └── HabitsContext.js     # Contexto de hábitos
-├── screens/
-│   ├── LoginScreen.jsx      # Pantalla de login
-│   ├── RegisterScreen.jsx   # Pantalla de registro
-│   ├── HomeScreen.jsx       # Pantalla principal
-│   └── CreateHabitScreen.jsx # Crear hábitos
-├── App.js                   # Componente principal
-└── README.md               # Documentación
+├── App.js                   # Reexporta la app desde frontend/
+├── app.json                 # Config estática de Expo
+├── app.config.js            # Config Expo + extra (Firebase desde .env)
+├── .env.example             # Plantilla de variables EXPO_PUBLIC_FIREBASE_*
+├── frontend/
+│   ├── App.js               # Navegación y providers
+│   ├── components/
+│   ├── constants/
+│   ├── contexts/            # Auth, hábitos, tema
+│   └── screens/             # auth, hábitos, stats, etc.
+├── backend/
+│   ├── config/
+│   │   └── firebase.js      # Firebase Auth + Firestore (lee .env / app.config extra)
+│   └── services/            # Notificaciones, gamificación, etc.
+├── __tests__/               # Pruebas Jest
+└── README.md
 ```
 
 ## 🚀 Instalación y Configuración
@@ -89,7 +90,13 @@ Sigue las instrucciones en `FIRESTORE_SETUP.md` para:
 - Configurar reglas de seguridad
 - Crear índices optimizados
 
-### 5. Ejecutar la App
+### 5. Calidad de código (opcional)
+```bash
+npm run lint    # ESLint (config Expo)
+npm test        # Jest
+```
+
+### 6. Ejecutar la App
 ```bash
 npx expo start --tunnel
 ```
@@ -278,8 +285,8 @@ Si tienes problemas con el tunnel de ngrok ("ngrok tunnel took too long to conne
 
 - **iOS**: 12.0+
 - **Android**: 8.0+
-- **Expo SDK**: 53.0.0
-- **React Native**: 0.76.0
+- **Expo SDK**: ~54
+- **React Native**: 0.81.x
 
 ## 🤝 Contribución
 

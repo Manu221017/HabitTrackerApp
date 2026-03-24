@@ -32,7 +32,11 @@ class CalendarService {
         ownerAccount: 'personal',
         accessLevel: Calendar.CalendarAccessLevel.OWNER,
       });
-      appCalendar = await Calendar.getCalendarAsync(newCalendarId);
+      const refreshed = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+      appCalendar = refreshed.find((c) => c.id === newCalendarId) || null;
+      if (!appCalendar) {
+        throw new Error('No se pudo obtener el calendario recién creado');
+      }
     }
     return appCalendar;
   }

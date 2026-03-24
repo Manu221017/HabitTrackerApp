@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
-import { onSnapshot, query, where, orderBy } from 'firebase/firestore';
-import { collection } from 'firebase/firestore';
+import { onSnapshot, query, where, orderBy, collection } from 'firebase/firestore';
 import { db } from '../../backend/config/firebase';
 import { useAuth } from './AuthContext';
 import GamificationService from '../../backend/services/GamificationService';

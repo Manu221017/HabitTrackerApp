@@ -1,3 +1,7 @@
+/**
+ * @deprecated No referenciado por la app. La persistencia de hábitos está en `backend/config/firebase.js`.
+ * Conservado solo como referencia; puedes eliminarlo si no lo necesitas.
+ */
 import { 
   collection, 
   addDoc, 
