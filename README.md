@@ -45,21 +45,31 @@ Una aplicación móvil moderna y completa para crear, gestionar y hacer seguimie
 
 ```
 HabitTrackerApp/
-├── App.js                   # Reexporta la app desde frontend/
-├── app.json                 # Config estática de Expo
-├── app.config.js            # Config Expo + extra (Firebase desde .env)
-├── .env.example             # Plantilla de variables EXPO_PUBLIC_FIREBASE_*
+├── App.js                      # Reexporta la app desde frontend/
+├── index.js                    # Entry point de Expo
+├── app.json                    # Config estática de Expo
+├── app.config.js               # Config dinámica (inyecta Firebase desde .env)
+├── .env.example                # Plantilla de variables EXPO_PUBLIC_FIREBASE_*
+├── .github/
+│   └── workflows/
+│       └── ci.yml              # CI: npm ci + test + lint
 ├── frontend/
-│   ├── App.js               # Navegación y providers
-│   ├── components/
-│   ├── constants/
-│   ├── contexts/            # Auth, hábitos, tema
-│   └── screens/             # auth, hábitos, stats, etc.
+│   ├── App.js                  # Navegación y providers
+│   ├── components/             # Componentes UI reutilizables
+│   ├── constants/              # Colores y estilos globales
+│   ├── contexts/               # Auth, hábitos y tema
+│   └── screens/                # Pantallas (auth, hábitos, stats, settings)
 ├── backend/
 │   ├── config/
-│   │   └── firebase.js      # Firebase Auth + Firestore (lee .env / app.config extra)
-│   └── services/            # Notificaciones, gamificación, etc.
-├── __tests__/               # Pruebas Jest
+│   │   └── firebase.js         # Firebase Auth + Firestore (usa .env/app.config)
+│   └── services/               # Notificaciones, gamificación, calendario, stats
+├── __tests__/                  # Pruebas Jest (servicios + flujos críticos)
+├── assets/                     # Recursos estáticos
+├── android/                    # Proyecto nativo Android (Expo prebuild/dev client)
+├── eslint.config.js            # Configuración ESLint (Expo flat config)
+├── FIRESTORE_SETUP.md          # Reglas e índices de Firestore
+├── package.json
+├── package-lock.json
 └── README.md
 ```
 
@@ -82,7 +92,9 @@ npm install
 1. Crea un proyecto en [Firebase Console](https://console.firebase.google.com/)
 2. Habilita Authentication (Email/Password)
 3. Crea una base de datos Firestore
-4. Copia las credenciales a `config/firebase.js`
+4. Copia `.env.example` a `.env`
+5. Completa en `.env` las variables `EXPO_PUBLIC_FIREBASE_*` con los datos del SDK web de Firebase
+6. Reinicia Expo con `npx expo start --clear` para recargar variables
 
 ### 4. Configurar Firestore
 Sigue las instrucciones en `FIRESTORE_SETUP.md` para:
@@ -160,6 +172,11 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
+    match /habitLogs/{logId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create, update: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
   }
 }
 ```
@@ -236,7 +253,7 @@ Si ves el error "NAVIGATE not handled":
 - Asegúrate de que el usuario esté autenticado correctamente
 
 ### Problemas de Firebase
-- Verifica las credenciales en `config/firebase.js`
+- Verifica que exista `.env` y que las variables `EXPO_PUBLIC_FIREBASE_*` estén completas
 - Asegúrate de que Firestore esté habilitado
 - Revisa las reglas de seguridad
 
