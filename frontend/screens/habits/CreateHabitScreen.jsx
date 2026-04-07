@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import Colors from '../../constants/Colors';
+import { Colors } from '../../constants/Colors';
 import { useThemedStyles, useTheme } from '../../contexts/ThemeContext';
 import { createHabit } from '../../../backend/config/firebase';
 import Toast from 'react-native-toast-message';
@@ -53,7 +53,7 @@ export default function CreateHabitScreen({ navigation }) {
   // Clear debug info when component mounts
   React.useEffect(() => {
     logState('Component mounted', { title, description, category, time });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- log solo al montar
 
   const handleCreateHabit = async () => {
     logState('Creating habit started', { title, description, category, time });

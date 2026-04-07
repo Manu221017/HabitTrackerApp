@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, View, Text, Animated } from 'react-native';
+import { Alert, Animated } from 'react-native';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import HomeScreen from '../frontend/screens/habits/HomeScreen';
 import Toast from 'react-native-toast-message';

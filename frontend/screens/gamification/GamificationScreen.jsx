@@ -1,21 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   ScrollView,
   StyleSheet,
   Animated,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Colors from '../../constants/Colors';
 import { useThemedStyles, useTheme } from '../../contexts/ThemeContext';
 import GamificationService from '../../../backend/services/GamificationService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useHabits } from '../../contexts/HabitsContext';
-
-const { width: screenWidth } = Dimensions.get('window');
 
 export default function GamificationScreen({ navigation }) {
   const GlobalStyles = useThemedStyles();
@@ -27,20 +22,19 @@ export default function GamificationScreen({ navigation }) {
   const [fadeAnim] = useState(new Animated.Value(0));
   const screenStyles = createStyles(colors);
 
-  useEffect(() => {
-    loadGamificationData();
-    animateScreen();
-  }, []);
-
-  const animateScreen = () => {
+  const animateScreen = useCallback(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 800,
       useNativeDriver: true,
     }).start();
-  };
+  }, [fadeAnim]);
 
-  const loadGamificationData = async () => {
+  const loadGamificationData = useCallback(async () => {
+    if (!user?.uid) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       
@@ -79,7 +73,12 @@ export default function GamificationScreen({ navigation }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.uid, habits]);
+
+  useEffect(() => {
+    loadGamificationData();
+    animateScreen();
+  }, [loadGamificationData, animateScreen]);
 
   const renderLevelCard = () => {
     if (!gamificationData) return null;

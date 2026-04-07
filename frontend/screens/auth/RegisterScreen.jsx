@@ -10,7 +10,6 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Colors from '../../constants/Colors';
 import { useThemedStyles, useTheme } from '../../contexts/ThemeContext';
 import { signUp } from '../../../backend/config/firebase';
 import Toast from 'react-native-toast-message';

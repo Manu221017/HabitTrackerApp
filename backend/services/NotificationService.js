@@ -1,7 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getNotificationMessage, isQuietHours, getNotificationPriority } from '../config/notificationConfig';
+import { getNotificationMessage, isQuietHours } from '../config/notificationConfig';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({

@@ -6,33 +6,38 @@ import {
   StyleSheet,
   Animated,
 } from 'react-native';
-import Colors from '../constants/Colors';
 import { useTheme } from '../contexts/ThemeContext';
 import { useHabits } from '../contexts/HabitsContext';
 
 export default function GamificationCard({ navigation }) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
-  const { getGamificationStats } = useHabits();
+  const { habits, todaysHabits, getGamificationStats } = useHabits();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [scaleAnim] = useState(new Animated.Value(1));
 
   useEffect(() => {
-    loadStats();
-  }, []);
-
-  const loadStats = async () => {
-    try {
-      setLoading(true);
-      const gamificationStats = await getGamificationStats();
-      setStats(gamificationStats);
-    } catch (error) {
-      console.error('Error al cargar estadísticas de gamificación:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        const gamificationStats = await getGamificationStats();
+        if (!cancelled) {
+          setStats(gamificationStats);
+        }
+      } catch (error) {
+        console.error('Error al cargar estadísticas de gamificación:', error);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [habits, todaysHabits]); // eslint-disable-line react-hooks/exhaustive-deps -- getGamificationStats inestable en Provider
 
   const handlePress = () => {
     // Animación de presión

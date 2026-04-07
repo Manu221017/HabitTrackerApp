@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
-import Colors from '../../constants/Colors';
 import { useThemedStyles } from '../../contexts/ThemeContext';
 import { useHabits } from '../../contexts/HabitsContext';
 import { updateHabitReminder } from '../../../backend/config/firebase';

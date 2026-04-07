@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,10 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LineChart, BarChart, PieChart, ProgressChart } from 'react-native-chart-kit';
+import { LineChart, BarChart } from 'react-native-chart-kit';
 import { useThemedStyles, useTheme } from '../../contexts/ThemeContext';
 import AdvancedStatsService from '../../../backend/services/AdvancedStatsService';
 import { useHabits } from '../../contexts/HabitsContext';
-import { useAuth } from '../../contexts/AuthContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -367,7 +366,6 @@ const createStyles = (colors) => StyleSheet.create({
 export default function AdvancedStatisticsScreen({ navigation }) {
   const GlobalStyles = useThemedStyles();
   const { colors } = useTheme();
-  const { user } = useAuth();
   const { habits } = useHabits();
   const [selectedTimeRange, setSelectedTimeRange] = useState(30);
   const [statsData, setStatsData] = useState(null);
@@ -381,11 +379,7 @@ export default function AdvancedStatisticsScreen({ navigation }) {
     { label: '90 días', value: 90 }
   ];
 
-  useEffect(() => {
-    loadAdvancedStats();
-  }, [habits, selectedTimeRange]);
-
-  const loadAdvancedStats = async () => {
+  const loadAdvancedStats = useCallback(async () => {
     try {
       setLoading(true);
       const report = AdvancedStatsService.generateCompleteReport(habits, selectedTimeRange);
@@ -396,7 +390,11 @@ export default function AdvancedStatisticsScreen({ navigation }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [habits, selectedTimeRange]);
+
+  useEffect(() => {
+    loadAdvancedStats();
+  }, [loadAdvancedStats]);
 
   const renderTimeRangeSelector = () => (
     <View style={screenStyles.timeRangeContainer}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Animated,
 } from 'react-native';
-import Colors from '../constants/Colors';
 import { useTheme } from '../contexts/ThemeContext';
 import AdvancedStatsService from '../../backend/services/AdvancedStatsService';
 import { useHabits } from '../contexts/HabitsContext';
@@ -19,11 +18,7 @@ export default function QuickStatsCard({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [scaleAnim] = useState(new Animated.Value(1));
 
-  useEffect(() => {
-    loadQuickStats();
-  }, [habits]);
-
-  const loadQuickStats = async () => {
+  const loadQuickStats = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -43,7 +38,11 @@ export default function QuickStatsCard({ navigation }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [habits]);
+
+  useEffect(() => {
+    loadQuickStats();
+  }, [loadQuickStats]);
 
   const handlePress = () => {
     // Animación de presión

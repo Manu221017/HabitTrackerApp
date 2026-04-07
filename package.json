@@ -20,7 +20,7 @@
     "ios": "npx expo run:ios",
     "web": "npx expo start --web",
     "test": "jest",
-    "lint": "expo lint"
+    "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",

@@ -1,12 +1,9 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Colors from '../../constants/Colors';
 import { useThemedStyles, useTheme } from '../../contexts/ThemeContext';
 import { useHabits } from '../../contexts/HabitsContext';
 import { getLogsByMonth } from '../../../backend/config/firebase';
-
-const { width: screenWidth } = Dimensions.get('window');
 
 const getDaysInMonth = (year, monthIndex) => {
   // monthIndex: 0-11
@@ -79,7 +76,6 @@ export default function CalendarScreen() {
     const entries = logsByDate[dateKey] || [];
     const completed = entries.filter(e => e.status === 'completed').length;
     const missed = entries.filter(e => e.status === 'missed').length;
-    const pending = entries.filter(e => e.status === 'pending').length;
     const total = habits.length;
     
     const isToday = dateKey === `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;

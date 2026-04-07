@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Colors from '../../constants/Colors';
+import { Colors } from '../../constants/Colors';
 import { useThemedStyles, useTheme } from '../../contexts/ThemeContext';
 import NotificationService from '../../../backend/services/NotificationService';
 
@@ -89,7 +89,6 @@ export default function NotificationSettingsScreen({ navigation }) {
   const [pendingReminders, setPendingReminders] = useState(true);
   const [dailyDigest, setDailyDigest] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadNotificationSettings();
@@ -101,7 +100,7 @@ export default function NotificationSettingsScreen({ navigation }) {
       setNotificationsEnabled(hasPermission);
       
       // Cargar configuraciones guardadas
-      const settings = await NotificationService.getStoredNotifications();
+      await NotificationService.getStoredNotifications();
       // Aquí podrías cargar configuraciones específicas del usuario
     } catch (error) {
       console.error('Error al cargar configuraciones:', error);
@@ -153,17 +152,12 @@ export default function NotificationSettingsScreen({ navigation }) {
 
   const setupDefaultNotifications = async () => {
     try {
-      setLoading(true);
-      
       // Configurar recordatorio de hábitos pendientes
       if (pendingReminders) {
         await NotificationService.schedulePendingHabitsReminder();
       }
-      
-      setLoading(false);
     } catch (error) {
       console.error('Error al configurar notificaciones por defecto:', error);
-      setLoading(false);
     }
   };
 
@@ -233,7 +227,7 @@ export default function NotificationSettingsScreen({ navigation }) {
         time: '12:00',
       });
       Alert.alert('Éxito', 'Notificación de prueba programada para las 12:00');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'No se pudo programar la notificación de prueba');
     }
   };

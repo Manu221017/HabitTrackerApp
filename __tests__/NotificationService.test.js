@@ -4,7 +4,19 @@ import * as Device from 'expo-device';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getNotificationMessage, isQuietHours } from '../backend/config/notificationConfig';
 
-jest.mock('expo-notifications');
+// Mock completo: evita cargar el módulo real (y el warning de Expo Go / push en Android).
+jest.mock('expo-notifications', () => ({
+  setNotificationHandler: jest.fn(),
+  getPermissionsAsync: jest.fn(),
+  requestPermissionsAsync: jest.fn(),
+  scheduleNotificationAsync: jest.fn(),
+  getExpoPushTokenAsync: jest.fn(),
+  cancelScheduledNotificationAsync: jest.fn(),
+  addNotificationReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+  getAllScheduledNotificationsAsync: jest.fn(),
+  cancelAllScheduledNotificationsAsync: jest.fn(),
+}));
 jest.mock('expo-device');
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
@@ -16,6 +28,16 @@ jest.mock('../backend/config/notificationConfig', () => ({
 }));
 
 describe('NotificationService', () => {
+  let consoleLogSpy;
+
+  beforeAll(() => {
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    consoleLogSpy.mockRestore();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
 

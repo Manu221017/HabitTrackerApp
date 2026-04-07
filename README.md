@@ -68,6 +68,7 @@ HabitTrackerApp/
 ├── android/                    # Proyecto nativo Android (Expo prebuild/dev client)
 ├── eslint.config.js            # Configuración ESLint (Expo flat config)
 ├── FIRESTORE_SETUP.md          # Reglas e índices de Firestore
+├── LICENSE                     # Licencia 0BSD (alineada con package.json)
 ├── package.json
 ├── package-lock.json
 └── README.md
@@ -104,7 +105,7 @@ Sigue las instrucciones en `FIRESTORE_SETUP.md` para:
 
 ### 5. Calidad de código (opcional)
 ```bash
-npm run lint    # ESLint (config Expo)
+npm run lint    # ESLint (0 warnings permitidos; misma config que Expo)
 npm test        # Jest
 ```
 
@@ -315,7 +316,7 @@ Si tienes problemas con el tunnel de ngrok ("ngrok tunnel took too long to conne
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
+Este proyecto está bajo la **licencia 0BSD** (BSD Zero Clause), alineada con el campo `license` de `package.json`. Ver el archivo `LICENSE` en la raíz del repositorio.
 
 ## 📞 Soporte
 

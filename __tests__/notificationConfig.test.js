@@ -1,4 +1,5 @@
-import NOTIFICATION_CONFIG, {
+import {
+  NOTIFICATION_CONFIG,
   getNotificationMessage,
   getCategoryConfig,
   isQuietHours,

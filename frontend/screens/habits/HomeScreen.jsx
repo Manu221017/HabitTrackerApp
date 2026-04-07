@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Colors from '../../constants/Colors';
+import { Colors } from '../../constants/Colors';
 import { useThemedStyles, useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useHabits } from '../../contexts/HabitsContext';
@@ -107,7 +107,7 @@ export default function HomeScreen({ navigation }) {
   // Inicializar progreso previo para no celebrar al abrir la app si ya estaba al 100%
   useLayoutEffect(() => {
     prevProgressRef.current = getProgressPercentage();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- snapshot inicial al montar
 
   useEffect(() => {
     const progress = getProgressPercentage();
@@ -116,7 +116,7 @@ export default function HomeScreen({ navigation }) {
       duration: 400,
       useNativeDriver: false,
     }).start();
-  }, [getProgressPercentage]);
+  }, [getProgressPercentage]); // eslint-disable-line react-hooks/exhaustive-deps -- progressAnim estable
 
   // Solo celebrar cuando pasamos *a* 100% (no cuando ya estábamos en 100%)
   useEffect(() => {
@@ -171,7 +171,7 @@ export default function HomeScreen({ navigation }) {
 
       return () => clearTimeout(hideTimer);
     }
-  }, [getProgressPercentage, todaysHabits.length]);
+  }, [getProgressPercentage, todaysHabits.length]); // eslint-disable-line react-hooks/exhaustive-deps -- refs Animated
 
   const onRefresh = async () => {
     setRefreshing(true);

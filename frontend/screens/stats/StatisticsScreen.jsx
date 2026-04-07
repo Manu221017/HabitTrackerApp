@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Colors from '../../constants/Colors';
 import { useThemedStyles, useTheme } from '../../contexts/ThemeContext';
 import { useHabits } from '../../contexts/HabitsContext';
 import { getLogsByMonth } from '../../../backend/config/firebase';
@@ -10,13 +9,16 @@ export default function StatisticsScreen() {
   const GlobalStyles = useThemedStyles();
   const { colors } = useTheme();
   const { habits, getBestStreak, getTotalStreak } = useHabits();
-  const today = new Date();
+  const monthSnapshot = useMemo(() => {
+    const t = new Date();
+    return { year: t.getFullYear(), month: t.getMonth() + 1 };
+  }, []);
   const [monthly, setMonthly] = useState({ completed: 0, missed: 0, pending: 0 });
 
   useEffect(() => {
     const load = async () => {
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const res = await getLogsByMonth(today.getFullYear(), month);
+      const month = String(monthSnapshot.month).padStart(2, '0');
+      const res = await getLogsByMonth(monthSnapshot.year, month);
       if (res.success) {
         const completed = res.logs.filter(l => l.status === 'completed').length;
         const missed = res.logs.filter(l => l.status === 'missed').length;
@@ -25,7 +27,7 @@ export default function StatisticsScreen() {
       }
     };
     load();
-  }, []);
+  }, [monthSnapshot]);
 
   const completionRate = useMemo(() => {
     const total = monthly.completed + monthly.missed + monthly.pending;

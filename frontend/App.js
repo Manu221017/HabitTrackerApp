@@ -21,7 +21,7 @@ import { HabitsProvider } from './contexts/HabitsContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import NotificationService from '../backend/services/NotificationService';
 
-import Colors from './constants/Colors';
+import { Colors } from './constants/Colors';
 import GlobalStyles from './constants/Styles';
 
 const Stack = createStackNavigator();
